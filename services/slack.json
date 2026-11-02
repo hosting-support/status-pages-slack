@@ -1,0 +1,11 @@
+{
+  "name": "Slack",
+  "provider": "slack",
+  "url": "https://slack-status.com",
+  "label": ":speech_balloon: *Slack Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Cloudflare",
+  "provider": "statuspage",
+  "url": "https://www.cloudflarestatus.com",
+  "label": ":cloud: *Cloudflare Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": []
+}

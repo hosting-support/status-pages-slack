@@ -1,0 +1,10 @@
+{
+  "name": "Oracle Cloud",
+  "provider": "oci",
+  "url": "https://ocistatus.oraclecloud.com",
+  "label": ":classical_building: *OCI Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false
+}

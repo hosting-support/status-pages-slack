@@ -1,0 +1,12 @@
+{
+  "name": "SMTP2GO",
+  "provider": "statuspage",
+  "url": "https://smtp2gostatus.com",
+  "label": ":email: *SMTP2GO Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": []
+}
