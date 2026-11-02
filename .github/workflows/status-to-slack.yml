@@ -1,0 +1,95 @@
+name: Status pages to Slack
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 min (GitHub may start runs a few minutes late)
+  workflow_dispatch:         # "Run workflow" button for manual runs
+    inputs:
+      service:
+        description: 'Which service to run'
+        type: choice
+        options: [all, cloudflare, smtp2go, aws, oci, slack]
+        default: all
+      test_post:
+        description: 'Also post the latest incident update, to preview the format'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write             # lets the keep-alive step re-enable this workflow
+
+concurrency:
+  group: status-to-slack
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      fail-fast: false       # one status page being down doesn't stop the others
+      matrix:
+        # To add a service: add services/<id>.json, a line here (and to the options above),
+        # and a repository secret with the Slack webhook for its channel.
+        # prefix = start of the optional Actions variable names, e.g. CF_CATEGORIES
+        include:
+          - { id: cloudflare, prefix: CF,      secret: SLACK_WEBHOOK_URL }
+          - { id: smtp2go,    prefix: SMTP2GO, secret: SLACK_WEBHOOK_URL_SMTP2GO }
+          - { id: aws,        prefix: AWS,     secret: SLACK_WEBHOOK_URL_AWS }
+          - { id: oci,        prefix: OCI,     secret: SLACK_WEBHOOK_URL_OCI }
+          - { id: slack,      prefix: SLACK,   secret: SLACK_WEBHOOK_URL_SLACK }
+    # A manual run for one service skips the other services' steps
+    env:
+      SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.SELECTED == 'true'
+
+      # The state file lives in the Actions cache, not the repo. Each run restores the
+      # newest one and saves a new copy; caches unused for 7 days are dropped by GitHub,
+      # after which the script just takes a fresh baseline.
+      - name: Restore state
+        if: env.SELECTED == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: state/${{ matrix.id }}.json
+          key: state-${{ matrix.id }}-${{ github.run_id }}
+          restore-keys: state-${{ matrix.id }}-
+
+      - name: Poll ${{ matrix.id }} and post changes
+        if: env.SELECTED == 'true'
+        shell: pwsh
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets[matrix.secret] }}
+          # Optional overrides of services/<id>.json, set under
+          # Settings -> Secrets and variables -> Actions -> Variables, e.g. AWS_CATEGORIES
+          CATEGORIES: ${{ vars[format('{0}_CATEGORIES', matrix.prefix)] }}
+          MIN_IMPACT: ${{ vars[format('{0}_MIN_IMPACT', matrix.prefix)] }}
+          SKIP_UNTAGGED: ${{ vars[format('{0}_SKIP_UNTAGGED', matrix.prefix)] }}
+          SKIP_OVERALL_STATUS: ${{ vars[format('{0}_SKIP_OVERALL_STATUS', matrix.prefix)] }}
+          SLACK_LABEL: ${{ vars[format('{0}_SLACK_LABEL', matrix.prefix)] }}
+        run: |
+          if (-not $env:SLACK_WEBHOOK_URL) {
+            Write-Host "::warning::No ${{ matrix.secret }} secret yet, so ${{ matrix.id }} is skipped"
+            exit 0
+          }
+          ./status-to-slack.ps1 -Service ${{ matrix.id }} ${{ inputs.test_post && '-TestPost' || '' }}
+
+      - name: Save state
+        if: env.SELECTED == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: state/${{ matrix.id }}.json
+          key: state-${{ matrix.id }}-${{ github.run_id }}
+
+      # GitHub pauses schedules in public repos after 60 days without commits.
+      # Re-enabling the workflow during the 00:00 UTC hour each day resets that timer.
+      - name: Keep schedule alive
+        if: github.event_name == 'schedule' && matrix.id == 'cloudflare'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%H)" = "00" ]; then
+            gh workflow enable status-to-slack.yml --repo "$GITHUB_REPOSITORY"
+          fi
