@@ -15,6 +15,7 @@
     components @{ <id> = @{ name; status; color } }   (only for -Components watching)
     extra      anything the provider wants saved for its next run (optional)
     keepIds    seen update ids to keep although not in this run's updates (optional)
+    preview    older updates to use for -TestPost when updates is empty (optional)
 
   This script does the rest, the same way for every service: compares with the state saved by
   the previous run, applies the filters, posts to Slack and saves the new state.
@@ -170,7 +171,8 @@ if (-not $firstRun -and -not $SkipOverallStatus -and $indicator -and $state.indi
 $updates = @($feed.updates | Where-Object { $_ })
 $newUpdates = @($updates | Where-Object { -not $seen.Contains($_.id) })
 if ($TestPost) {
-    $latest = $updates | Where-Object { $_.kind -ne 'Maintenance' } | Sort-Object { [datetime]$_.time } -Descending | Select-Object -First 1
+    # preview: older updates a provider offers only for this, when its feed has none
+    $latest = @($updates) + @($feed.preview) | Where-Object { $_ -and $_.kind -ne 'Maintenance' } | Sort-Object { [datetime]$_.time } -Descending | Select-Object -First 1
     if ($latest) { $newUpdates = @($latest | Select-Object *, @{ n = 'test'; e = { $true } }) + $newUpdates }
 }
 foreach ($u in ($newUpdates | Sort-Object { [datetime]$_.time })) {
