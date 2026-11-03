@@ -8,11 +8,13 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $base = 'https://ocistatus.oraclecloud.com/api/v2'
     $status = Get-Json "$base/status.json"
 
-    $summaries = foreach ($month in (Get-Date).ToUniversalTime(), (Get-Date).ToUniversalTime().AddMonths(-1)) {
+    function Get-MonthSummaries($month) {
         try { (Get-Json "$base/incident-summary/$($month.ToString('yyyyMM')).json").incidentSummaries }
         catch { if ($_.Exception.Response.StatusCode -ne 404 -and $_.Exception.Response.StatusCode -ne 'NotFound') { throw } }
     }
-    $summaries = @($summaries | Where-Object { $_ } | Sort-Object { [datetime]$_.lastIncidentPostTime } -Descending)
+    $now = (Get-Date).ToUniversalTime()
+    $summaries = @(@(Get-MonthSummaries $now) + @(Get-MonthSummaries $now.AddMonths(-1)) |
+        Where-Object { $_ } | Sort-Object { [datetime]$_.lastIncidentPostTime } -Descending)
 
     # impactStatus: NormalPerformance, ServiceDisruption (and possibly a degraded state)
     function Get-Impact($s) {
@@ -21,26 +23,9 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $impactRank = @{ none = 0; minor = 1; major = 2; critical = 3 }
     $statusColor = @{ investigating = 'red'; identified = 'orange'; monitoring = 'yellow'; resolved = 'green' }
 
-    $known = @{}   # incidentId -> @{ last; ids }
-    if ($Saved) { $Saved.PSObject.Properties | ForEach-Object { $known[$_.Name] = $_.Value } }
-    $extra = @{}
-    $keepIds = @()
-
-    $first = $true
-    $updates = foreach ($s in $summaries) {
-        $last = ([datetime]$s.lastIncidentPostTime).ToUniversalTime().ToString('o')
-        $k = $known[$s.incidentId]
-        # the newest incident is always read, so -TestPost has something to show
-        if (-not $first -and $k -and $k.last -eq $last) {
-            $extra[$s.incidentId] = $k
-            $keepIds += @($k.ids)
-            continue
-        }
-        $first = $false
-        $inc = Get-Json "$base/incidents/$($s.incidentId).json"
+    # one update per post of the incident
+    function ConvertTo-Updates($inc) {
         $posts = @($inc.incidentPosts)
-        $extra[$s.incidentId] = @{ last = $last; ids = @($posts.incidentPostId) }
-
         # worst impact over the whole incident, so a "resolved" post keeps the incident's impact
         $worst = 'none'; $worstText = ''
         foreach ($p in $posts) { foreach ($i in $p.incidentImpacts) {
@@ -73,10 +58,42 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         }
     }
 
+    $known = @{}   # incidentId -> @{ last; ids }
+    if ($Saved) { $Saved.PSObject.Properties | ForEach-Object { $known[$_.Name] = $_.Value } }
+    $extra = @{}
+    $keepIds = @()
+
+    $first = $true
+    $updates = foreach ($s in $summaries) {
+        $last = ([datetime]$s.lastIncidentPostTime).ToUniversalTime().ToString('o')
+        $k = $known[$s.incidentId]
+        # the newest incident is always read, so -TestPost has something to show
+        if (-not $first -and $k -and $k.last -eq $last) {
+            $extra[$s.incidentId] = $k
+            $keepIds += @($k.ids)
+            continue
+        }
+        $first = $false
+        $inc = Get-Json "$base/incidents/$($s.incidentId).json"
+        $extra[$s.incidentId] = @{ last = $last; ids = @($inc.incidentPosts.incidentPostId) }
+        ConvertTo-Updates $inc
+    }
+
+    # OCI often goes months without incidents. For -TestPost (set by the main script), look
+    # further back for one to preview; it's only used for the test post, never posted as new.
+    $preview = @()
+    if ($TestPost -and -not $summaries.Count) {
+        for ($m = 2; $m -le 12 -and -not $preview.Count; $m++) {
+            $old = @(Get-MonthSummaries $now.AddMonths(-$m) | Where-Object { $_ } | Sort-Object { [datetime]$_.lastIncidentPostTime } -Descending)
+            if ($old.Count) { $preview = @(ConvertTo-Updates (Get-Json "$base/incidents/$($old[0].incidentId).json")) }
+        }
+    }
+
     @{
         overall = @{ indicator = $status.status.indicator; description = $status.status.description }
         updates = $updates
         extra   = $extra
         keepIds = $keepIds
+        preview = $preview
     }
 }
