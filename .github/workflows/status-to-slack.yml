@@ -34,7 +34,7 @@ jobs:
         # and a repository secret with the Slack webhook for its channel.
         # prefix = start of the optional Actions variable names, e.g. CF_CATEGORIES
         include:
-          - { id: cloudflare, prefix: CF,      secret: SLACK_WEBHOOK_URL }
+          - { id: cloudflare, prefix: CF,      secret: SLACK_WEBHOOK_URL_CLOUDFLARE }
           - { id: smtp2go,    prefix: SMTP2GO, secret: SLACK_WEBHOOK_URL_SMTP2GO }
           - { id: aws,        prefix: AWS,     secret: SLACK_WEBHOOK_URL_AWS }
           - { id: oci,        prefix: OCI,     secret: SLACK_WEBHOOK_URL_OCI }
