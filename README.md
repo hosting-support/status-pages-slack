@@ -8,11 +8,12 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 
 | Service | Status page | Settings file | Webhook secret | Variable prefix |
 |---|---|---|---|---|
-| Cloudflare | https://www.cloudflarestatus.com | `services/cloudflare.json` | `SLACK_WEBHOOK_URL` | `CF_` |
+| Cloudflare | https://www.cloudflarestatus.com | `services/cloudflare.json` | `SLACK_WEBHOOK_URL_CLOUDFLARE` | `CF_` |
 | SMTP2GO | https://smtp2gostatus.com | `services/smtp2go.json` | `SLACK_WEBHOOK_URL_SMTP2GO` | `SMTP2GO_` |
 | AWS | https://health.aws.amazon.com/health/status | `services/aws.json` | `SLACK_WEBHOOK_URL_AWS` | `AWS_` |
 | Oracle Cloud | https://ocistatus.oraclecloud.com | `services/oci.json` | `SLACK_WEBHOOK_URL_OCI` | `OCI_` |
 | Slack | https://slack-status.com | `services/slack.json` | `SLACK_WEBHOOK_URL_SLACK` | `SLACK_` |
+| Salesforce (CAN56) | https://status.salesforce.com/instances/CAN56 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
 
 ## How it fits together
 
@@ -49,7 +50,7 @@ Each service's defaults are in its `services/<id>.json`:
 | `minImpact` | `"major"` | Skip incidents below this impact: `none` (default), `minor`, `major`, `critical`. |
 | `skipUntagged` | `true` | With `categories`, also drop incidents that list nothing they affect. |
 | `skipOverallStatus` | `true` | Don't post overall status changes. |
-| `includeMaintenance` | `true` | Also post scheduled maintenance (Statuspage sites and Slack). |
+| `includeMaintenance` | `true` | Also post scheduled maintenance (Statuspage sites, Slack and Salesforce). |
 | `components` | `["Dashboard", "*Workers*"]` | Also post when one of these components changes status (Statuspage sites). |
 | `label` | `":cloud: *Cloudflare Status*"` | Small header on every post. |
 
@@ -67,6 +68,7 @@ What `categories` matches, and what the impact levels mean, per service:
 | AWS | service name (`Amazon Elastic Compute Cloud`), region name (`N. Virginia`), region code (`us-east-1`), service code (`ec2-us-east-1`) | informational = minor, degraded = major, disruption = critical |
 | Oracle Cloud | service name (`Networking`), region (`US East (Ashburn)`), category (`Cloud Services`) | service disruption = major, other degraded states = minor |
 | Slack | service (`Messaging`, `Login/SSO`, `Huddles`, `Notifications`, `Apps/Integrations/APIs` ...) | notice = none, incident = minor, outage = major |
+| Salesforce | service key or name: `coreService` / `Core service`, `Communities` / `Experience Cloud`, `liveAgent` / `Chat` ... (defaults to the services a support portal relies on; Data Cloud, Marketing Cloud and Agentforce are left out) | disruption or major severity = major, otherwise minor |
 
 ## Adding another status page
 
