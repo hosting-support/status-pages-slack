@@ -1,0 +1,12 @@
+{
+  "name": "Salesforce",
+  "provider": "salesforce",
+  "instance": "CAN56",
+  "url": "https://status.salesforce.com/instances/CAN56",
+  "label": ":ticket: *Salesforce Status (CAN56)*",
+  "categories": ["coreService", "Communities", "liveAgent", "search", "ServiceCloudMessagingChannels", "ServiceCloudVoice", "EinsteinBots"],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false
+}
