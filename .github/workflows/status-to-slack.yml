@@ -72,7 +72,9 @@ jobs:
           SLACK_LABEL: ${{ vars[format('{0}_SLACK_LABEL', matrix.prefix)] }}
         run: |
           if (-not $env:SLACK_WEBHOOK_URL) {
-            Write-Host "::warning::No ${{ matrix.secret }} secret yet, so ${{ matrix.id }} is skipped"
+            # still checked for the status page, just not posted to Slack
+            Write-Host "::warning::No ${{ matrix.secret }} secret yet, so ${{ matrix.id }} isn't posted to Slack"
+            ./status-to-slack.ps1 -Service ${{ matrix.id }} -DryRun
             exit 0
           }
           ./status-to-slack.ps1 -Service ${{ matrix.id }} ${{ inputs.test_post && '-TestPost' || '' }}
@@ -84,6 +86,16 @@ jobs:
           path: state/${{ matrix.id }}.json
           key: state-${{ matrix.id }}-${{ github.run_id }}
 
+      # This service's current status, for the status page (publish job below)
+      - name: Upload status snapshot
+        if: env.SELECTED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-${{ matrix.id }}
+          path: status/${{ matrix.id }}.json
+          if-no-files-found: ignore
+          retention-days: 1
+
       # GitHub pauses schedules in public repos after 60 days without commits.
       # Re-enabling the workflow during the 00:00 UTC hour each day resets that timer.
       - name: Keep schedule alive
@@ -94,3 +106,42 @@ jobs:
           if [ "$(date -u +%H)" = "00" ]; then
             gh workflow enable status-to-slack.yml --repo "$GITHUB_REPOSITORY"
           fi
+
+  # Status page on GitHub Pages: combines the snapshots from the jobs above with the currently
+  # published page (for services that weren't checked in this run) and publishes it.
+  # Needs Settings -> Pages -> Source: "GitHub Actions".
+  publish:
+    needs: poll
+    if: always()             # publish what we have even if one status page failed
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download status snapshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: snapshot-*
+          path: status
+          merge-multiple: true
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Build status page
+        shell: pwsh
+        run: ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousUrl "${{ steps.pages.outputs.base_url }}/status.json"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
