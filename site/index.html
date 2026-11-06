@@ -40,6 +40,15 @@
   }
   .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); flex: none; }
 
+  /* update health: is the scheduler still feeding this page? */
+  .health {
+    --accent: var(--none);
+    display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 10px;
+    font-size: 13px; color: var(--muted);
+  }
+  .health .dot { width: 9px; height: 9px; }
+  .health strong { color: var(--text); font-weight: 600; }
+
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
   .card {
     --accent: var(--none);
@@ -72,6 +81,7 @@
   body.embed main { padding: 8px; }
   body.embed header, body.embed details { display: none; }
   body.embed .banner { padding: 8px 12px; margin-bottom: 8px; }
+  body.embed .health { margin-bottom: 6px; font-size: 12px; }
   body.embed .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
   body.embed .card { padding: 10px 12px; }
 </style>
@@ -80,8 +90,9 @@
 <main>
   <header>
     <h1>Vendor Status</h1>
-    <span class="meta" id="updated">Loading…</span>
+    <span class="meta">Refreshes every minute</span>
   </header>
+  <div id="health" class="health" hidden><span class="dot"></span><span id="health-text"></span></div>
   <div id="banner" class="banner" hidden><span class="dot"></span><span id="banner-text"></span></div>
   <div id="grid" class="grid"></div>
 </main>
@@ -157,6 +168,36 @@
     return { node: c, level };
   }
 
+  // The Cloudflare scheduler starts a run every 5 min; GitHub's hourly schedule is only a backup.
+  // So the health follows the scheduler's last run, not just the page's last update.
+  const minutesSince = (iso) => (Date.now() - new Date(iso)) / 60000;
+  function showHealth(data) {
+    const run = data.run || {};
+    const schedulerAt = run.lastSchedulerAt || data.generatedAt;
+    const age = minutesSince(schedulerAt);
+    let level, head, detail;
+    if (age <= 12) {
+      level = 'none'; head = 'Updates running';
+      detail = `every 5 min via the Cloudflare scheduler · last run ${ago(schedulerAt)}`;
+    } else if (age <= STALE_MINUTES) {
+      level = 'minor'; head = 'Updates delayed';
+      detail = `last scheduler run ${ago(schedulerAt)}`;
+    } else {
+      level = 'critical'; head = 'Updates stopped';
+      detail = `no Cloudflare scheduler run for ${ago(schedulerAt).replace(' ago', '')}`;
+    }
+    // GitHub's backup ran more recently than the scheduler: the data is fresher than the scheduler
+    if (run.trigger === 'schedule' && minutesSince(data.generatedAt) < age - 1) {
+      detail += ` · GitHub backup schedule ran ${ago(data.generatedAt)}`;
+    }
+    const box = document.getElementById('health');
+    box.style.setProperty('--accent', accent(level));
+    const text = document.getElementById('health-text');
+    text.replaceChildren(el('strong', { textContent: head }), ` · ${detail}`);
+    if (safeUrl(run.url)) text.append(' · ', link('run log', run.url));
+    box.hidden = false;
+  }
+
   async function load() {
     try {
       const res = await fetch(`status.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -177,7 +218,7 @@
       if (stale.length) text += ` · ${stale.length} not checked recently`;
       document.getElementById('banner-text').textContent = text;
       banner.hidden = false;
-      document.getElementById('updated').textContent = `Updated ${ago(data.generatedAt)} · refreshes every minute`;
+      showHealth(data);
     } catch (e) {
       document.getElementById('grid').replaceChildren(el('div', { class: 'error', textContent: `Couldn't load status: ${e.message}` }));
     }
