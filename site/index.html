@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vendor Status</title>
+<title>CMiC Vendors Status</title>
 <style>
   :root {
     --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5d6675; --line: #e3e6ec;
@@ -28,8 +28,8 @@
   }
   main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 32px; }
   a { color: inherit; }
-  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
-  h1 { font-size: 20px; margin: 0; }
+  header { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 16px; text-align: center; }
+  h1 { font-size: 26px; margin: 0; }
   .meta { color: var(--muted); font-size: 13px; }
 
   .banner {
@@ -92,7 +92,7 @@
 <body>
 <main>
   <header>
-    <h1>Vendor Status</h1>
+    <h1>CMiC Vendors Status</h1>
     <span class="meta">Refreshes every minute</span>
   </header>
   <div id="health" class="health" hidden><span class="dot"></span><span id="health-text"></span></div>
