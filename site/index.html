@@ -49,13 +49,15 @@
   .health .dot { width: 9px; height: 9px; }
   .health strong { color: var(--text); font-weight: 600; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  /* grid-auto-rows: 1fr makes every row as tall as the tallest card, so all tiles match */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); grid-auto-rows: 1fr; gap: 12px; }
   .card {
     --accent: var(--none);
+    display: flex; flex-direction: column;
     background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent);
     border-radius: 10px; padding: 14px 16px; min-width: 0;
   }
-  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .card-head h2 { font-size: 16px; margin: 0; }
   .card-head h2 a { text-decoration: none; }
   .card-head h2 a:hover { text-decoration: underline; }
@@ -71,7 +73,8 @@
   .inc-title { font-weight: 600; }
   .inc-meta { color: var(--muted); font-size: 13px; }
   .quiet { color: var(--muted); font-size: 13px; margin-top: 10px; }
-  details { margin-top: 10px; font-size: 13px; }
+  /* margin-top: auto keeps "Recent incidents" at the bottom of every tile */
+  details { margin-top: auto; padding-top: 10px; font-size: 13px; }
   summary { cursor: pointer; color: var(--muted); }
   details ul { margin: 6px 0 0; padding-left: 18px; }
   details li { margin: 4px 0; overflow-wrap: anywhere; }
