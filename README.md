@@ -15,6 +15,7 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Slack | https://slack-status.com | `services/slack.json` | `SLACK_WEBHOOK_URL_SLACK` | `SLACK_` |
 | Salesforce (CAN56) | https://status.salesforce.com/instances/CAN56 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
 | Dynatrace | https://dynatrace.status.io | `services/dynatrace.json` | `SLACK_WEBHOOK_URL_DYNATRACE` | `DT_` |
+| Jira | https://jira-software.status.atlassian.com | `services/jira.json` | `SLACK_WEBHOOK_URL_JIRA` | `JIRA_` |
 
 ## How it fits together
 
@@ -65,7 +66,7 @@ What `categories` matches, and what the impact levels mean, per service:
 
 | Service | `categories` matches | Impact mapping |
 |---|---|---|
-| Cloudflare, SMTP2GO | component names, group names (Cloudflare regions: `North America`, `Europe` ...), or `Group / Component` for one component in one group | the incident's own impact |
+| Cloudflare, SMTP2GO, Jira | component names, group names (Cloudflare regions: `North America`, `Europe` ...), or `Group / Component` for one component in one group | the incident's own impact |
 | AWS | service name (`Amazon Elastic Compute Cloud`), region name (`N. Virginia`), region code (`us-east-1`), service code (`ec2-us-east-1`) | informational = minor, degraded = major, disruption = critical |
 | Oracle Cloud | service name (`Networking`), region (`US East (Ashburn)`), category (`Cloud Services`) | service disruption = major, other degraded states = minor |
 | Slack | service (`Messaging`, `Login/SSO`, `Huddles`, `Notifications`, `Apps/Integrations/APIs` ...) | notice = none, incident = minor, outage = major |
