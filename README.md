@@ -86,8 +86,6 @@ What `categories` matches, and what the impact levels mean, per service:
 .\status-to-slack.ps1 -Service aws -DryRun -TestPost  # print the newest update as it would post
 ```
 
-For a private repo on a free account, change the cron to `'*/30 * * * *'` to stay within the
-2,000 free Actions minutes a month (five services take five times the minutes of one).
 
 ## Status page
 
@@ -105,3 +103,18 @@ for a public repo (it only shows what the vendors' status pages already publish)
 
 Files: `site/index.html` (the page), `build-status-page.ps1` (combines each service's
 snapshot from `status-to-slack.ps1` into `status.json`), and the `publish` job in the workflow.
+
+## Timing: the Cloudflare Worker
+
+GitHub's own schedule is best-effort: on this repo it ran every 3-8 hours instead of every
+5 minutes. So a Cloudflare Worker (`cloudflare-worker/trigger.js`) starts the workflow every
+5 minutes through GitHub's API, the same as pressing **Run workflow**. The workflow's own
+hourly schedule stays as a backup in case the Worker stops.
+
+The Worker needs a secret `GITHUB_TOKEN`: a fine-grained GitHub token limited to this
+repository with **Actions: Read and write**. When the token expires, the Worker's logs show
+`GitHub returned 401` and runs fall back to the hourly schedule; create a new token and update
+the secret.
+
+This only works for a public repo on a free account: a private repo would run out of the
+2,000 free Actions minutes a month within a few days.
