@@ -14,6 +14,13 @@ on:
         description: 'Also post the latest incident update, to preview the format'
         type: boolean
         default: false
+      deploy_page:
+        description: 'Also redeploy the status page site (needed after changing site/index.html)'
+        type: boolean
+        default: false
+  push:                      # redeploy the status page when its design changes
+    branches: [main]
+    paths: ['site/**']
 
 permissions:
   contents: read
@@ -109,21 +116,17 @@ jobs:
             gh workflow enable status-to-slack.yml --repo "$GITHUB_REPOSITORY"
           fi
 
-  # Status page on GitHub Pages: combines the snapshots from the jobs above with the currently
-  # published page (for services that weren't checked in this run) and publishes it.
-  # Needs Settings -> Pages -> Source: "GitHub Actions".
+  # Status page data: combines the snapshots from the jobs above with the previous status.json
+  # (for services that weren't checked in this run) and saves it to the "status-data" branch,
+  # which the page reads. That's a quick git push, unlike a GitHub Pages deployment, which can
+  # take several minutes and doesn't keep up with a run every 5 minutes.
   publish:
     needs: poll
     if: always()             # publish what we have even if one status page failed
     runs-on: ubuntu-latest
-    timeout-minutes: 10      # longer than the deploy timeout below, so a stuck deploy can cancel itself
+    timeout-minutes: 5
     permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      contents: write        # push the status-data branch
     steps:
       - uses: actions/checkout@v4
 
@@ -134,21 +137,57 @@ jobs:
           path: status
           merge-multiple: true
 
-      - id: pages
-        uses: actions/configure-pages@v5
+      - name: Get the previous status
+        run: |
+          if git fetch --depth=1 origin status-data; then
+            git show FETCH_HEAD:status.json > previous-status.json
+          else
+            echo "No status-data branch yet; starting fresh"
+          fi
 
       - name: Build status page
         shell: pwsh
-        run: ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousUrl "${{ steps.pages.outputs.base_url }}/status.json" -Trigger "${{ github.event_name }}" -RunUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          $previous = if (Test-Path previous-status.json) { 'previous-status.json' } else { '' }
+          ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousFile $previous -Trigger "${{ github.event_name }}" -RunUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+      # The branch holds just status.json in a single commit, replaced on every run, so it
+      # doesn't pile up history.
+      - name: Save status to the status-data branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir data && cp _site/status.json data/ && cd data
+          git init -q -b status-data
+          git add status.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Status at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" status-data
+
+      # The site itself (index.html) only needs deploying when it changes: on a push to site/,
+      # on a manual run with "deploy_page", and hourly from GitHub's schedule as a backup.
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name == 'push' || github.event_name == 'schedule' || inputs.deploy_page
         with:
           path: _site
 
+  # Needs Settings -> Pages -> Source: "GitHub Actions".
+  deploy-site:
+    needs: publish
+    if: always() && needs.publish.result == 'success' && (github.event_name == 'push' || github.event_name == 'schedule' || inputs.deploy_page)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10      # longer than the deploy timeout below, so a stuck deploy can cancel itself
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
         with:
           # Give up on a deployment that hangs after 4 min. The action then cancels it, so the
-          # next run isn't blocked behind it ("in progress deployment"). Must stay below the
+          # next deploy isn't blocked behind it ("in progress deployment"). Must stay below the
           # job's timeout-minutes, or the job is killed before it can cancel.
           timeout: 240000
