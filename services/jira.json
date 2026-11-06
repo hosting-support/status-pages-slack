@@ -1,0 +1,12 @@
+{
+  "name": "Jira",
+  "provider": "statuspage",
+  "url": "https://jira-software.status.atlassian.com",
+  "label": ":ticket: *Jira Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": []
+}
