@@ -2,7 +2,7 @@ name: Status pages to Slack
 
 on:
   schedule:
-        - cron: '17 * * * *'    # hourly backup; the Cloudflare Worker starts it every 5 min
+    - cron: '17 * * * *'    # hourly backup; the Cloudflare Worker in cloudflare-worker/ starts it every 5 min
   workflow_dispatch:         # "Run workflow" button for manual runs
     inputs:
       service:
@@ -96,10 +96,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
-      # GitHub pauses schedules in public repos after 60 days without commits.
-      # Re-enabling the workflow during the 00:00 UTC hour each day resets that timer.
+      # GitHub disables scheduled workflows in public repos after 60 days without commits, and a
+      # disabled workflow can't be started by the Worker either. Re-enabling it during the
+      # 00:00 UTC hour each day resets that timer.
       - name: Keep schedule alive
-                if: matrix.id == 'cloudflare' && env.SELECTED == 'true'
+        if: matrix.id == 'cloudflare' && env.SELECTED == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
