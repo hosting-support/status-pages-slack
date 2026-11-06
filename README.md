@@ -11,9 +11,10 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Cloudflare | https://www.cloudflarestatus.com | `services/cloudflare.json` | `SLACK_WEBHOOK_URL_CLOUDFLARE` | `CF_` |
 | SMTP2GO | https://smtp2gostatus.com | `services/smtp2go.json` | `SLACK_WEBHOOK_URL_SMTP2GO` | `SMTP2GO_` |
 | AWS | https://health.aws.amazon.com/health/status | `services/aws.json` | `SLACK_WEBHOOK_URL_AWS` | `AWS_` |
-| Oracle Cloud | https://ocistatus.oraclecloud.com | `services/oci.json` | `SLACK_WEBHOOK_URL_OCI` | `OCI_` |
+| OCI (Oracle Cloud Infrastructure) | https://ocistatus.oraclecloud.com | `services/oci.json` | `SLACK_WEBHOOK_URL_OCI` | `OCI_` |
 | Slack | https://slack-status.com | `services/slack.json` | `SLACK_WEBHOOK_URL_SLACK` | `SLACK_` |
 | Salesforce (CAN56) | https://status.salesforce.com/instances/CAN56 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
+| Dynatrace | https://dynatrace.status.io | `services/dynatrace.json` | `SLACK_WEBHOOK_URL_DYNATRACE` | `DT_` |
 
 ## How it fits together
 
@@ -64,11 +65,12 @@ What `categories` matches, and what the impact levels mean, per service:
 
 | Service | `categories` matches | Impact mapping |
 |---|---|---|
-| Cloudflare, SMTP2GO | component names and group names (Cloudflare regions: `North America`, `Europe` ...) | the incident's own impact |
+| Cloudflare, SMTP2GO | component names, group names (Cloudflare regions: `North America`, `Europe` ...), or `Group / Component` for one component in one group | the incident's own impact |
 | AWS | service name (`Amazon Elastic Compute Cloud`), region name (`N. Virginia`), region code (`us-east-1`), service code (`ec2-us-east-1`) | informational = minor, degraded = major, disruption = critical |
 | Oracle Cloud | service name (`Networking`), region (`US East (Ashburn)`), category (`Cloud Services`) | service disruption = major, other degraded states = minor |
 | Slack | service (`Messaging`, `Login/SSO`, `Huddles`, `Notifications`, `Apps/Integrations/APIs` ...) | notice = none, incident = minor, outage = major |
 | Salesforce | service key or name: `coreService` / `Core service`, `Communities` / `Experience Cloud`, `liveAgent` / `Chat` ... (defaults to the services a support portal relies on; Data Cloud, Marketing Cloud and Agentforce are left out) | disruption or major severity = major, otherwise minor |
+| Dynatrace | container names: `Analyze-AWS-americas` (Process / Retain / Analyze / Automate, per cloud and region) and the global services, which all start with `Dynatrace` (`Dynatrace Support Portal`, `Dynatrace Hub` ...). Default: `*-AWS-americas` and `Dynatrace *` | degraded = minor, partial disruption = major, disruption or security event = critical |
 
 ## Adding another status page
 
