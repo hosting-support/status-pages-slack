@@ -1,0 +1,12 @@
+{
+  "name": "Dynatrace",
+  "provider": "statusio",
+  "pageId": "546d8cb6af8407b6730000cb",
+  "url": "https://dynatrace.status.io",
+  "label": ":bar_chart: *Dynatrace Status*",
+  "categories": ["*-AWS-americas", "Dynatrace *"],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false
+}

@@ -1,5 +1,5 @@
 {
-  "name": "Oracle Cloud",
+  "name": "OCI (Oracle Cloud Infrastructure)",
   "provider": "oci",
   "url": "https://ocistatus.oraclecloud.com",
   "label": ":classical_building: *OCI Status*",
