@@ -115,7 +115,7 @@ jobs:
     needs: poll
     if: always()             # publish what we have even if one status page failed
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10      # longer than the deploy timeout below, so a stuck deploy can cancel itself
     permissions:
       contents: read
       pages: write
@@ -146,3 +146,8 @@ jobs:
 
       - id: deploy
         uses: actions/deploy-pages@v4
+        with:
+          # Give up on a deployment that hangs after 4 min. The action then cancels it, so the
+          # next run isn't blocked behind it ("in progress deployment"). Must stay below the
+          # job's timeout-minutes, or the job is killed before it can cancel.
+          timeout: 240000
