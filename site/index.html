@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor Status</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5d6675; --line: #e3e6ec;
+    --none: #2eb67d; --minor: #d9a21b; --major: #e8711c; --critical: #e01e5a; --maintenance: #1d9bd1; --stale: #9aa1ad;
+  }
+  /* --accent is set per banner / card; --tint is a light wash of it */
+  .banner, .card { --tint: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --card: #1b1f27; --text: #e7e9ee; --muted: #9aa3b2; --line: #2a303b;
+      --minor: #ecb22e; --major: #f38020;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --card: #1b1f27; --text: #e7e9ee; --muted: #9aa3b2; --line: #2a303b;
+    --minor: #ecb22e; --major: #f38020;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 32px; }
+  a { color: inherit; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+  h1 { font-size: 20px; margin: 0; }
+  .meta { color: var(--muted); font-size: 13px; }
+
+  .banner {
+    --accent: var(--none);
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 16px;
+    background: var(--tint); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+    border-radius: 10px; font-weight: 600;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .card {
+    --accent: var(--none);
+    background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: 10px; padding: 14px 16px; min-width: 0;
+  }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-head h2 { font-size: 16px; margin: 0; }
+  .card-head h2 a { text-decoration: none; }
+  .card-head h2 a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: var(--tint); color: var(--text);
+  }
+  .badge .dot { width: 8px; height: 8px; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  ul.incidents { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  ul.incidents li { border-top: 1px solid var(--line); padding-top: 8px; overflow-wrap: anywhere; }
+  .inc-title { font-weight: 600; }
+  .inc-meta { color: var(--muted); font-size: 13px; }
+  .quiet { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  details { margin-top: 10px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--muted); }
+  details ul { margin: 6px 0 0; padding-left: 18px; }
+  details li { margin: 4px 0; overflow-wrap: anywhere; }
+  .error { padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+
+  /* ?embed=1 : no page header, no history, tighter cards (for dashboards / iframes) */
+  body.embed main { padding: 8px; }
+  body.embed header, body.embed details { display: none; }
+  body.embed .banner { padding: 8px 12px; margin-bottom: 8px; }
+  body.embed .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  body.embed .card { padding: 10px 12px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Vendor Status</h1>
+    <span class="meta" id="updated">Loading…</span>
+  </header>
+  <div id="banner" class="banner" hidden><span class="dot"></span><span id="banner-text"></span></div>
+  <div id="grid" class="grid"></div>
+</main>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  if (params.has('embed')) document.body.classList.add('embed');
+  if (params.get('theme') === 'light' || params.get('theme') === 'dark') document.documentElement.dataset.theme = params.get('theme');
+
+  const STALE_MINUTES = 20;   // the workflow runs every 5 min; older than this means it stopped
+  const LEVELS = {
+    none:        { label: 'Operational',  rank: 0 },
+    maintenance: { label: 'Maintenance',  rank: 1 },
+    minor:       { label: 'Minor issue',  rank: 2 },
+    major:       { label: 'Major issue',  rank: 3 },
+    critical:    { label: 'Critical',     rank: 4 },
+    stale:       { label: 'No recent data', rank: 1 },
+  };
+
+  const el = (tag, props = {}, ...children) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') n.className = v; else if (k === 'style') n.style.cssText = v; else n[k] = v;
+    }
+    for (const c of children) if (c != null) n.append(c);
+    return n;
+  };
+  // only http(s) links from the data
+  const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
+  const link = (text, url) => { const u = safeUrl(url); return u ? el('a', { href: u, target: '_blank', rel: 'noopener', textContent: text }) : el('span', { textContent: text }); };
+  const ago = (iso) => {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (!isFinite(m)) return '';
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60); if (h < 48) return `${h} h ago`;
+    return `${Math.round(h / 24)} days ago`;
+  };
+  const accent = (level) => `var(--${level === 'stale' ? 'stale' : level})`;
+
+  function incidentItem(i) {
+    const affects = (i.affects || []).slice(0, 4).join(', ') + ((i.affects || []).length > 4 ? ` +${i.affects.length - 4} more` : '');
+    const meta = [i.status, i.impactText && `impact: ${i.impactText}`, affects, ago(i.updated)].filter(Boolean).join(' · ');
+    return el('li', {}, el('div', { class: 'inc-title' }, link(i.title, i.url)), el('div', { class: 'inc-meta', textContent: meta }));
+  }
+
+  function card(s) {
+    const stale = (Date.now() - new Date(s.checkedAt)) / 60000 > STALE_MINUTES;
+    const level = stale ? 'stale' : (LEVELS[s.level] ? s.level : 'none');
+    const c = el('section', { class: 'card', style: `--accent: ${accent(level)}` });
+    c.append(el('div', { class: 'card-head' },
+      el('h2', {}, link(s.name, s.statusPage)),
+      el('span', { class: 'badge' }, el('span', { class: 'dot' }), LEVELS[level].label)));
+
+    const sub = [];
+    // the vendor's own headline; it can disagree with the badge, which follows the filters
+    if (s.overall && s.overall.description) sub.push(`Vendor page: ${s.overall.description}`);
+    sub.push(`checked ${ago(s.checkedAt)}`);
+    c.append(el('div', { class: 'sub', textContent: sub.join(' · ') }));
+
+    const open = s.open || [];
+    if (open.length) {
+      c.append(el('ul', { class: 'incidents' }, ...open.map(incidentItem)));
+    } else {
+      const last = (s.recent || [])[0];
+      c.append(el('div', { class: 'quiet' },
+        'No open incidents', last ? el('span', {}, ' · last: ', link(last.title, last.url), ` (${ago(last.updated)})`) : null));
+    }
+    if ((s.recent || []).length) {
+      c.append(el('details', {}, el('summary', { textContent: `Recent incidents (${s.recent.length})` }),
+        el('ul', {}, ...s.recent.map(r => el('li', {}, link(r.title, r.url), ` · ${r.status} · ${ago(r.updated)}`)))));
+    }
+    return { node: c, level };
+  }
+
+  async function load() {
+    try {
+      const res = await fetch(`status.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`status.json: HTTP ${res.status}`);
+      const data = await res.json();
+      const services = data.services || [];
+      const cards = services.map(card);
+      // worst first, so problems are at the top
+      cards.sort((a, b) => LEVELS[b.level].rank - LEVELS[a.level].rank);
+      document.getElementById('grid').replaceChildren(...cards.map(c => c.node));
+
+      const issues = cards.filter(c => c.level !== 'none' && c.level !== 'stale');
+      const stale = cards.filter(c => c.level === 'stale');
+      const worst = cards.reduce((w, c) => LEVELS[c.level].rank > LEVELS[w].rank && c.level !== 'stale' ? c.level : w, 'none');
+      const banner = document.getElementById('banner');
+      banner.style.setProperty('--accent', accent(issues.length ? worst : (stale.length ? 'stale' : 'none')));
+      let text = issues.length ? `${issues.length} of ${cards.length} services reporting issues` : `All ${cards.length} services operational`;
+      if (stale.length) text += ` · ${stale.length} not checked recently`;
+      document.getElementById('banner-text').textContent = text;
+      banner.hidden = false;
+      document.getElementById('updated').textContent = `Updated ${ago(data.generatedAt)} · refreshes every minute`;
+    } catch (e) {
+      document.getElementById('grid').replaceChildren(el('div', { class: 'error', textContent: `Couldn't load status: ${e.message}` }));
+    }
+  }
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+</body>
+</html>

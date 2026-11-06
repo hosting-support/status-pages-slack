@@ -88,3 +88,20 @@ What `categories` matches, and what the impact levels mean, per service:
 
 For a private repo on a free account, change the cron to `'*/30 * * * *'` to stay within the
 2,000 free Actions minutes a month (five services take five times the minutes of one).
+
+## Status page
+
+Every run also publishes a one-page overview of all services to GitHub Pages:
+`https://<your-user>.github.io/<repo>/`. One card per service, worst first, each with its open
+incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
+every minute. A service whose data is over 20 minutes old shows as "No recent data".
+
+- `?embed=1` hides the page header and history, for dashboards or iframes.
+- `?theme=dark` or `?theme=light` forces a theme (default follows the viewer's system).
+- The data behind it is `status.json` next to the page, if another tool wants to read it.
+
+Setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**. The page is public
+for a public repo (it only shows what the vendors' status pages already publish).
+
+Files: `site/index.html` (the page), `build-status-page.ps1` (combines each service's
+snapshot from `status-to-slack.ps1` into `status.json`), and the `publish` job in the workflow.

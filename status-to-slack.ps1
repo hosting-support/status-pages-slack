@@ -16,9 +16,13 @@
     extra      anything the provider wants saved for its next run (optional)
     keepIds    seen update ids to keep although not in this run's updates (optional)
     preview    older updates to use for -TestPost when updates is empty (optional)
+    incidents  one entry per incident for the status page: key, title, url, kind, open, status,
+               color, impact, impactText, affects, showAffects, time (optional; by default
+               worked out from updates, grouping them by url + title)
 
   This script does the rest, the same way for every service: compares with the state saved by
-  the previous run, applies the filters, posts to Slack and saves the new state.
+  the previous run, applies the filters, posts to Slack and saves the new state. It also writes
+  a snapshot (status\<name>.json) of the open and recent incidents, for the status page.
 
   Posts are sent when:
     - the overall status changes (if the page has one)
@@ -45,6 +49,7 @@ param(
     [string] $Service,                       # name of a file in services\, e.g. 'cloudflare'
     [string] $WebhookUrl = $env:SLACK_WEBHOOK_URL,
     [string] $StateFile  = (Join-Path $PSScriptRoot "state\$Service.json"),
+    [string] $SnapshotFile = (Join-Path $PSScriptRoot "status\$Service.json"),   # for the status page
     [switch] $DryRun,                        # print messages instead of posting
     [switch] $TestPost                       # also post the newest update, to preview the format
 )
@@ -221,6 +226,50 @@ New-Item -ItemType Directory -Force -Path (Split-Path $StateFile) | Out-Null
     components = $watched
     extra      = $feed.extra
 } | ConvertTo-Json -Depth 6 | Set-Content -Path $StateFile -Encoding UTF8
+
+# ---- snapshot for the status page: open incidents and the last few closed ones ----
+# Same filters as the Slack posts. Unless the provider lists its incidents, they're worked out
+# from the updates: one per url + title, closed once its newest update is green (resolved).
+$incidents = if ($null -ne $feed.incidents) { @($feed.incidents) } else {
+    @($updates | Group-Object { "$($_.url)|$($_.title)" } | ForEach-Object {
+        $last = $_.Group | Sort-Object { [datetime]$_.time } | Select-Object -Last 1
+        $last | Select-Object *, @{ n = 'open'; e = {
+            # maintenance only counts while it's underway, not while it's scheduled
+            $_.color -ne 'green' -and ($_.kind -ne 'Maintenance' -or $_.status -match 'progress|verifying|started') } }
+    })
+}
+$incidents = @($incidents | Where-Object { $_ -and (Test-Wanted $_) } | Sort-Object { [datetime]$_.time } -Descending)
+function ConvertTo-Entry($i) {
+    [ordered]@{
+        title      = [string]$i.title
+        url        = [string]$i.url
+        kind       = [string]$i.kind
+        status     = [string]$i.status
+        impact     = [string]$i.impact
+        impactText = [string]$i.impactText
+        affects    = @($(if ($null -ne $i.showAffects) { $i.showAffects } else { $i.affects }) | Where-Object { $_ } | ForEach-Object { [string]$_ })
+        updated    = ([datetime]$i.time).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    }
+}
+$open = @($incidents | Where-Object open)
+# level: worst open incident; an open incident without a rated impact still counts as minor
+$level = 'none'
+foreach ($i in $open | Where-Object { $_.kind -ne 'Maintenance' }) {
+    $r = [Math]::Max(1, [int]$impactRank[[string]$i.impact])
+    if ($r -gt $impactRank[$level]) { $level = @('none', 'minor', 'major', 'critical')[$r] }
+}
+if ($level -eq 'none' -and ($open | Where-Object { $_.kind -eq 'Maintenance' })) { $level = 'maintenance' }
+New-Item -ItemType Directory -Force -Path (Split-Path $SnapshotFile) | Out-Null
+[ordered]@{
+    id         = $Service
+    name       = $Name
+    statusPage = [string]$Config.url
+    checkedAt  = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    level      = $level
+    overall    = $feed.overall
+    open       = @($open | ForEach-Object { ConvertTo-Entry $_ })
+    recent     = @($incidents | Where-Object { -not $_.open } | Select-Object -First 5 | ForEach-Object { ConvertTo-Entry $_ })
+} | ConvertTo-Json -Depth 6 | Set-Content -Path $SnapshotFile -Encoding UTF8
 
 $statusText = if ($feed.overall) { $feed.overall.description } else { "$($updates.Count) updates in feed" }
 if ($firstRun) { Write-Host "First run: saved baseline ($statusText, $($seen.Count) updates). Nothing posted." }
