@@ -23,8 +23,16 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     }
 
     $updates = foreach ($i in $items) {
-        # an incident is matched by its components and by the groups they belong to (e.g. regions)
-        $affects = @($i.components | ForEach-Object { $_.name; if ($_.group_id) { $groupNames[$_.group_id] } } | Where-Object { $_ } | Select-Object -Unique)
+        # an incident is matched by its components, the groups they belong to (e.g. regions),
+        # and "Group / Component" for one component in one group (e.g. a product in one region)
+        $affects = @($i.components | ForEach-Object {
+            $_.name
+            if ($_.group_id -and $groupNames[$_.group_id]) { $groupNames[$_.group_id]; "$($groupNames[$_.group_id]) / $($_.name)" }
+        } | Where-Object { $_ } | Select-Object -Unique)
+        # showGroups: print "Group / Component" where the component name alone is ambiguous
+        $shown = if ($Config.showGroups) {
+            @($i.components | ForEach-Object { if ($_.group_id -and $groupNames[$_.group_id]) { "$($groupNames[$_.group_id]) / $($_.name)" } else { $_.name } })
+        } else { @($i.components.name) }
         foreach ($u in $i.incident_updates) {
             [pscustomobject]@{
                 id         = $u.id
@@ -38,7 +46,7 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
                 impactText = [string]$i.impact
                 # posts list the components only, not the region groups (too long otherwise)
                 affects    = $affects
-                showAffects = @($i.components.name)
+                showAffects = $shown
                 body       = $u.body
             }
         }
