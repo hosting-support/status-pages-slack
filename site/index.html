@@ -198,11 +198,32 @@
     box.hidden = false;
   }
 
+  // On GitHub Pages (<owner>.github.io/<repo>/) the data comes from the repo's "status-data"
+  // branch, which every run updates; the site itself is only redeployed when the page changes.
+  // The status.json next to the page is the fallback (and what a local copy uses).
+  function dataUrls() {
+    const urls = [];
+    const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+    const repo = location.pathname.split('/').filter(Boolean)[0];
+    if (m && repo) urls.push(`https://raw.githubusercontent.com/${m[1]}/${repo}/status-data/status.json`);
+    urls.push('status.json');
+    return urls;
+  }
+  async function fetchStatus() {
+    let lastError;
+    for (const url of dataUrls()) {
+      try {
+        const res = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) return await res.json();
+        lastError = new Error(`${url}: HTTP ${res.status}`);
+      } catch (e) { lastError = e; }
+    }
+    throw lastError;
+  }
+
   async function load() {
     try {
-      const res = await fetch(`status.json?t=${Date.now()}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`status.json: HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await fetchStatus();
       const services = data.services || [];
       const cards = services.map(card);
       // worst first, so problems are at the top
