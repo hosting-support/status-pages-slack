@@ -5,8 +5,8 @@
 
 .DESCRIPTION
   A run may not have a fresh snapshot for every service (a manual run for one service, or a
-  status page that didn't answer). Those keep their entry from the currently published
-  status.json (-PreviousUrl), and the page shows them as "No recent data" once they're old.
+  status page that didn't answer). Those keep their entry from the previous status.json
+  (-PreviousFile or -PreviousUrl), and the page shows them as "No recent data" once they're old.
 
 .EXAMPLE
   .\build-status-page.ps1 -SnapshotDir status -OutDir _site
@@ -15,6 +15,7 @@ param(
     [string] $SnapshotDir = (Join-Path $PSScriptRoot 'status'),
     [string] $OutDir      = (Join-Path $PSScriptRoot '_site'),
     [string] $PreviousUrl,                    # the published status.json, e.g. https://<user>.github.io/<repo>/status.json
+    [string] $PreviousFile,                   # or the previous status.json as a local file
     # What started this run, for the page's update health line: 'workflow_dispatch' (the
     # Cloudflare scheduler, or the Run workflow button) or 'schedule' (GitHub's hourly backup)
     [string] $Trigger = 'manual',
@@ -27,9 +28,10 @@ $now = Format-Utc (Get-Date)
 
 $services = [ordered]@{}
 $previousRun = $null
-if ($PreviousUrl) {
+if ($PreviousFile -or $PreviousUrl) {
     try {
-        $previous = Invoke-RestMethod -Uri $PreviousUrl -TimeoutSec 20
+        $previous = if ($PreviousFile) { Get-Content $PreviousFile -Raw | ConvertFrom-Json }
+                    else { Invoke-RestMethod -Uri $PreviousUrl -TimeoutSec 20 }
         foreach ($s in $previous.services) { $services[$s.id] = $s }
         $previousRun = $previous.run
         Write-Host "Previous status.json: $($services.Count) services"

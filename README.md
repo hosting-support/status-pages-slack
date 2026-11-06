@@ -98,13 +98,19 @@ every minute. A service whose data is over 20 minutes old shows as "No recent da
 
 - `?embed=1` hides the page header and history, for dashboards or iframes.
 - `?theme=dark` or `?theme=light` forces a theme (default follows the viewer's system).
-- The data behind it is `status.json` next to the page, if another tool wants to read it.
+- The data behind it is `status.json` on the `status-data` branch
+  (`https://raw.githubusercontent.com/<your-user>/<repo>/status-data/status.json`), if another
+  tool wants to read it.
 
 Setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**. The page is public
 for a public repo (it only shows what the vendors' status pages already publish).
 
 Files: `site/index.html` (the page), `build-status-page.ps1` (combines each service's
-snapshot from `status-to-slack.ps1` into `status.json`), and the `publish` job in the workflow.
+snapshot from `status-to-slack.ps1` into `status.json`), and two jobs in the workflow:
+`publish` saves `status.json` to the `status-data` branch on every run (a quick git push; the
+branch holds a single commit that is replaced each time), and `deploy-site` redeploys the page
+to GitHub Pages only when `site/` changes, hourly, or on a manual run with **deploy_page**.
+Deploying Pages every 5 minutes doesn't work: a deployment can take longer than that.
 
 ## Timing: the Cloudflare Worker
 
