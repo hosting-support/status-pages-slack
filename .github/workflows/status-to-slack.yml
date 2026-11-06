@@ -138,7 +138,7 @@ jobs:
 
       - name: Build status page
         shell: pwsh
-        run: ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousUrl "${{ steps.pages.outputs.base_url }}/status.json"
+        run: ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousUrl "${{ steps.pages.outputs.base_url }}/status.json" -Trigger "${{ github.event_name }}" -RunUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - uses: actions/upload-pages-artifact@v3
         with:
