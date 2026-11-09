@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   poll:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 3
     strategy:
       fail-fast: false       # one status page being down doesn't stop the others
@@ -53,7 +53,7 @@ jobs:
     env:
       SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: env.SELECTED == 'true'
 
       # The state file lives in the Actions cache, not the repo. Each run restores the
@@ -61,7 +61,7 @@ jobs:
       # after which the script just takes a fresh baseline.
       - name: Restore state
         if: env.SELECTED == 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: state/${{ matrix.id }}.json
           key: state-${{ matrix.id }}-${{ github.run_id }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Save state
         if: env.SELECTED == 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: state/${{ matrix.id }}.json
           key: state-${{ matrix.id }}-${{ github.run_id }}
@@ -98,7 +98,7 @@ jobs:
       # This service's current status, for the status page (publish job below)
       - name: Upload status snapshot
         if: env.SELECTED == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: snapshot-${{ matrix.id }}
           path: status/${{ matrix.id }}.json
@@ -124,15 +124,15 @@ jobs:
   publish:
     needs: poll
     if: always()             # publish what we have even if one status page failed
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: write        # push the status-data branch
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download status snapshots
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: snapshot-*
           path: status
@@ -167,16 +167,17 @@ jobs:
 
       # The site itself (index.html) only needs deploying when it changes: on a push to site/,
       # on a manual run with "deploy_page", and hourly from GitHub's schedule as a backup.
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         if: github.event_name == 'push' || github.event_name == 'schedule' || inputs.deploy_page
         with:
           path: _site
+          include-hidden-files: true   # keep .nojekyll
 
   # Needs Settings -> Pages -> Source: "GitHub Actions".
   deploy-site:
     needs: publish
     if: always() && needs.publish.result == 'success' && (github.event_name == 'push' || github.event_name == 'schedule' || inputs.deploy_page)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10      # longer than the deploy timeout below, so a stuck deploy can cancel itself
     permissions:
       pages: write
@@ -186,7 +187,7 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         with:
           # Give up on a deployment that hangs after 4 min. The action then cancels it, so the
           # next deploy isn't blocked behind it ("in progress deployment"). Must stay below the
