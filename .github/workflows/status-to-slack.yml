@@ -148,6 +148,11 @@ jobs:
 
       - name: Build status page
         shell: pwsh
+        env:
+          # A check-mark reaction on a Slack post marks that incident acknowledged on the page.
+          # Bot token of the Slack app that reads the channels (see README); optional.
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          ACK_EMOJI: ${{ vars.ACK_EMOJI }}   # optional, e.g. "white_check_mark,eyes"
         run: |
           $previous = if (Test-Path previous-status.json) { 'previous-status.json' } else { '' }
           ./build-status-page.ps1 -SnapshotDir status -OutDir _site -PreviousFile $previous -Trigger "${{ github.event_name }}" -RunUrl "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
