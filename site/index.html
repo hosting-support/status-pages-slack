@@ -73,6 +73,14 @@
   .inc-title { font-weight: 600; }
   .inc-meta { color: var(--muted); font-size: 13px; }
   .quiet { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  /* acknowledged incident: dimmed, with who/when/comment in a green box */
+  ul.incidents li.acked .inc-title, ul.incidents li.acked .inc-meta { opacity: .7; }
+  .ack {
+    margin-top: 6px; padding: 6px 10px; border-radius: 6px; font-size: 13px;
+    background: color-mix(in srgb, var(--none) 12%, transparent); border-left: 3px solid var(--none);
+  }
+  .ack-head { font-weight: 600; }
+  .ack-note { margin-top: 2px; font-style: italic; white-space: pre-line; }
   /* margin-top: auto keeps "Recent incidents" at the bottom of every tile */
   details { margin-top: auto; padding-top: 10px; font-size: 13px; }
   summary { cursor: pointer; color: var(--muted); }
@@ -134,12 +142,27 @@
     const h = Math.round(m / 60); if (h < 48) return `${h} h ago`;
     return `${Math.round(h / 24)} days ago`;
   };
-  const accent = (level) => `var(--${level === 'stale' ? 'stale' : level})`;
+  // local date and time, plus how long ago: "Nov 9, 9:42 AM (3 h ago)"
+  const when = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return `${d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} (${ago(iso)})`;
+  };
+  const accent = (level) =>`var(--${level === 'stale' ? 'stale' : level})`;
 
   function incidentItem(i) {
     const affects = (i.affects || []).slice(0, 4).join(', ') + ((i.affects || []).length > 4 ? ` +${i.affects.length - 4} more` : '');
     const meta = [i.status, i.impactText && `impact: ${i.impactText}`, affects, ago(i.updated)].filter(Boolean).join(' · ');
-    return el('li', {}, el('div', { class: 'inc-title' }, link(i.title, i.url)), el('div', { class: 'inc-meta', textContent: meta }));
+    const li = el('li', {}, el('div', { class: 'inc-title' }, link(i.title, i.url)), el('div', { class: 'inc-meta', textContent: meta }));
+    // acknowledged with a check-mark reaction in Slack: doesn't count toward the tile's status
+    if (i.ack) {
+      const by = (i.ack.by || []).join(', ');
+      li.classList.add('acked');
+      li.append(el('div', { class: 'ack' },
+        el('div', { class: 'ack-head', textContent: `✓ Acknowledged${by ? ` by ${by}` : ''}${i.ack.since ? ` · ${when(i.ack.since)}` : ''}` }),
+        i.ack.comment ? el('div', { class: 'ack-note', textContent: i.ack.comment }) : null));
+    }
+    return li;
   }
 
   function card(s) {
