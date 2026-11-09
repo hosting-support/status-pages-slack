@@ -113,6 +113,23 @@ branch holds a single commit that is replaced each time), and `deploy-site` rede
 to GitHub Pages only when `site/` changes, hourly, or on a manual run with **deploy_page**.
 Deploying Pages every 5 minutes doesn't work: a deployment can take longer than that.
 
+### Acknowledging an incident
+
+When an open incident doesn't affect us, react to its Slack post with ✅ (`:white_check_mark:`;
+✔️ and ☑️ also work). Within 5 minutes the page shows the incident as acknowledged, with who
+reacted, when the page first saw it, and a comment, and it no longer turns the tile red or amber.
+The comment is the newest reply in that post's thread ("Not impacting us" if there's none).
+Removing the reaction undoes it; once the incident is resolved it leaves the open list anyway.
+Slack still gets every update. Other emoji can be set with the `ACK_EMOJI` variable
+(comma-separated names).
+
+This needs a Slack app that can read the channels: a **bot token** with the scopes
+`channels:history`, `groups:history`, `channels:read`, `groups:read` and `users:read`, saved as
+the repository secret `SLACK_BOT_TOKEN`, and the app added to each vendor channel (and to any
+channel where the posts are shared, e.g. #hostingsupport). The `publish` job reads the last 30
+days of those channels, only while some incident is open. Without the secret, nothing is
+acknowledged.
+
 ## Timing: the Cloudflare Worker
 
 GitHub's own schedule is best-effort: on this repo it ran every 3-8 hours instead of every
