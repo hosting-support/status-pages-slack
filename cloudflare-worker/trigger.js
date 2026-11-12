@@ -7,7 +7,7 @@
 //     access to this one repository and "Actions: Read and write" permission
 //   Settings -> Trigger Events: cron trigger */5 * * * *
 
-const REPO = 'nlazarevski/status-pages-slack';
+const REPO = 'hosting-support/status-pages-slack';
 const WORKFLOW = 'status-to-slack.yml';
 const BRANCH = 'main';
 
