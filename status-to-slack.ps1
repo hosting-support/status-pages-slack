@@ -152,6 +152,16 @@ if (-not (Test-Path $providerPath)) { throw "Unknown provider '$($Config.provide
 . $providerPath
 # Providers get the settings and their own saved data (e.g. what they fetched last time)
 $feed = Get-StatusFeed -Config $Config -IncludeMaintenance:$IncludeMaintenance -Saved $state.extra
+# rebaseline: the provider's source changed (e.g. a new Salesforce instance), so treat this like
+# a first run: mark everything seen, post nothing
+if ($feed.rebaseline) { $firstRun = $true }
+# vars: values only the provider knows, filled into {name} in the label and url (Salesforce instance)
+if ($feed.vars) {
+    foreach ($k in @($feed.vars.Keys)) {
+        $Label = ([string]$Label).Replace("{$k}", [string]$feed.vars[$k])
+        $Config.url = ([string]$Config.url).Replace("{$k}", [string]$feed.vars[$k])
+    }
+}
 
 function Test-Wanted($u) {
     if ($u.kind -ne 'Maintenance' -and [int]$impactRank[[string]$u.impact] -lt $impactRank[$MinImpact]) { return $false }

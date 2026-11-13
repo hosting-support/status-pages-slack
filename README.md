@@ -13,9 +13,10 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | AWS | https://health.aws.amazon.com/health/status | `services/aws.json` | `SLACK_WEBHOOK_URL_AWS` | `AWS_` |
 | OCI (Oracle Cloud Infrastructure) | https://ocistatus.oraclecloud.com | `services/oci.json` | `SLACK_WEBHOOK_URL_OCI` | `OCI_` |
 | Slack | https://slack-status.com | `services/slack.json` | `SLACK_WEBHOOK_URL_SLACK` | `SLACK_` |
-| Salesforce (CAN56) | https://status.salesforce.com/instances/CAN56 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
+| Salesforce (instance looked up from `cmicglobal`, now CAN36) | https://status.salesforce.com/instances/CAN36 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
 | Dynatrace | https://dynatrace.status.io | `services/dynatrace.json` | `SLACK_WEBHOOK_URL_DYNATRACE` | `DT_` |
 | Jira | https://jira-software.status.atlassian.com | `services/jira.json` | `SLACK_WEBHOOK_URL_JIRA` | `JIRA_` |
+| Microsoft (Microsoft 365 + Azure) | https://status.cloud.microsoft | `services/microsoft.json` | `SLACK_WEBHOOK_URL_MICROSOFT` | `MS_` |
 
 ## How it fits together
 
@@ -93,7 +94,8 @@ What `categories` matches, and what the impact levels mean, per service:
 ## Status page
 
 Every run also publishes a one-page overview of all services to GitHub Pages:
-`https://<your-user>.github.io/<repo>/`. One card per service, worst first, each with its open
+`https://<your-user>.github.io/<repo>/`. Services are split into sections by `"group"` in their
+settings file (Core Vendors first, then Other Vendors). One card per service, worst first, each with its open
 incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
 every minute. A service whose data is over 20 minutes old shows as "No recent data".
 

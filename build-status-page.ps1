@@ -59,6 +59,11 @@ foreach ($f in Get-ChildItem -Path $SnapshotDir -Filter *.json -File -ErrorActio
 # drop services whose settings file was removed
 $known = @(Get-ChildItem -Path (Join-Path $PSScriptRoot 'services') -Filter *.json | ForEach-Object BaseName)
 $list = @($services.Values | Where-Object { $_.id -in $known } | Sort-Object name)
+# the page section each service goes in ("group" in its settings file, e.g. Core / Other)
+foreach ($s in $list) {
+    $group = (Get-Content (Join-Path $PSScriptRoot "services\$($s.id).json") -Raw | ConvertFrom-Json).group
+    $s | Add-Member -NotePropertyName group -NotePropertyValue $(if ($group) { [string]$group } else { 'Other' }) -Force
+}
 
 # ---- acknowledgements from Slack reactions ----
 # An open incident is matched to Slack posts by its link, or by its title when the link is just
