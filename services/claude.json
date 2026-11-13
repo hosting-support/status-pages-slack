@@ -1,0 +1,13 @@
+{
+  "name": "Claude",
+  "group": "Other",
+  "provider": "statuspage",
+  "url": "https://status.claude.com",
+  "label": ":robot_face: *Claude Status*",
+  "categories": ["claude.ai", "Claude API*", "Claude Console*", "Claude Code", "Claude Cowork"],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": []
+}
