@@ -1,14 +1,26 @@
 # Salesforce Trust status (https://status.salesforce.com), via https://api.status.salesforce.com/v1.
 # Salesforce reports per instance (the server cluster an org lives on), so the settings file
-# names one: "instance": "CAN56". Find an org's instance with
-# https://api.status.salesforce.com/v1/search/<my-domain-name>.
+# names the org's My Domain ("domain": "cmicglobal") and the instance is looked up each run
+# (https://api.status.salesforce.com/v1/instanceAliases/<my-domain-name>).
 # Incidents have events (updates) but no "resolved" event, so a resolved incident gets one
 # extra update of its own.
 
 function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $api = 'https://api.status.salesforce.com/v1'
+    # "domain" (the My Domain name, cmicglobal for cmicglobal.my.salesforce.com) is looked up
+    # on every run, so a move to another instance is picked up by itself. "instance" is the
+    # fallback if the lookup fails.
     $instance = $Config.instance
-    if (-not $instance) { throw 'services/salesforce.json needs "instance", e.g. "CAN56"' }
+    if ($Config.domain) {
+        try {
+            $found = (Get-Json "$api/instanceAliases/$($Config.domain)").instanceKey
+            if ($found) {
+                if ($instance -and $found -ne $instance) { Write-Host "::notice::$($Config.domain) is now on $found (settings file says $instance)" }
+                $instance = $found
+            }
+        } catch { Write-Host "Couldn't look up the instance for $($Config.domain) ($($_.Exception.Message)); using $instance" }
+    }
+    if (-not $instance) { throw 'services/salesforce.json needs "domain" (e.g. "cmicglobal") or "instance" (e.g. "CAN36")' }
 
     $inst = Get-Json "$api/instances/$instance/status?childProducts=false"
     # no @(): Windows PowerShell returns a JSON list as one object, and @() would nest it
@@ -99,5 +111,10 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         default                { @{ indicator = 'none';        description = "$instance $(Format-Type $s.ToLower())" }; break }
     }
 
-    @{ overall = $overall; updates = $updates }
+    # vars: fills {instance} in the settings file's url and label
+    # rebaseline: after a move to another instance, that instance's earlier incidents are
+    # marked as seen instead of all being posted as new
+    $moved = [string]$Saved.instance -ne $instance
+    if ($moved) { Write-Host "Instance is $instance (was '$($Saved.instance)'): taking a fresh baseline, nothing posted this run" }
+    @{ overall = $overall; updates = $updates; vars = @{ instance = $instance }; extra = @{ instance = $instance }; rebaseline = $moved }
 }
