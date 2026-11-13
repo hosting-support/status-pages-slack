@@ -1,5 +1,6 @@
 {
   "name": "Jira",
+  "group": "Other",
   "provider": "statuspage",
   "url": "https://jira-software.status.atlassian.com",
   "label": ":ticket: *Jira Status*",

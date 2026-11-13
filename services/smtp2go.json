@@ -1,5 +1,6 @@
 {
   "name": "SMTP2GO",
+  "group": "Core",
   "provider": "statuspage",
   "url": "https://smtp2gostatus.com",
   "label": ":email: *SMTP2GO Status*",

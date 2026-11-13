@@ -1,5 +1,6 @@
 {
   "name": "Dynatrace",
+  "group": "Other",
   "provider": "statusio",
   "pageId": "546d8cb6af8407b6730000cb",
   "url": "https://dynatrace.status.io",

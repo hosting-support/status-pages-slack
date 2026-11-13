@@ -1,5 +1,6 @@
 {
   "name": "AWS",
+  "group": "Core",
   "provider": "aws",
   "url": "https://health.aws.amazon.com/health/status",
   "label": ":package: *AWS Health*",

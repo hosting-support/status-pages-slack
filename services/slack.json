@@ -1,5 +1,6 @@
 {
   "name": "Slack",
+  "group": "Other",
   "provider": "slack",
   "url": "https://slack-status.com",
   "label": ":speech_balloon: *Slack Status*",

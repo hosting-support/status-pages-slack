@@ -1,5 +1,6 @@
 {
   "name": "Cloudflare",
+  "group": "Core",
   "provider": "statuspage",
   "url": "https://www.cloudflarestatus.com",
   "label": ":cloud: *Cloudflare Status*",

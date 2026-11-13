@@ -1,0 +1,12 @@
+{
+  "name": "Microsoft",
+  "provider": "microsoft",
+  "url": "https://status.cloud.microsoft",
+  "label": ":office: *Microsoft Status*",
+  "group": "Other",
+  "categories": ["Microsoft 365", "Azure"],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false
+}
