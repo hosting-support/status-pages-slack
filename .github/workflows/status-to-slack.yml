@@ -8,7 +8,7 @@ on:
       service:
         description: 'Which service to run'
         type: choice
-        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft]
+        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude]
         default: all
       test_post:
         description: 'Also post the latest incident update, to preview the format'
@@ -50,6 +50,7 @@ jobs:
           - { id: dynatrace,  prefix: DT,      secret: SLACK_WEBHOOK_URL_DYNATRACE }
           - { id: jira,       prefix: JIRA,    secret: SLACK_WEBHOOK_URL_JIRA }
           - { id: microsoft,  prefix: MS,      secret: SLACK_WEBHOOK_URL_MICROSOFT }
+          - { id: claude,     prefix: CLAUDE,  secret: SLACK_WEBHOOK_URL_CLAUDE }
     # A manual run for one service skips the other services' steps
     env:
       SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
