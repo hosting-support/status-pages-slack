@@ -1,0 +1,24 @@
+{
+  "name": "WebLogic Logs",
+  "purpose": "AWS SaaS server logs",
+  "group": "CMiC Internal Checks",
+  "groupOrder": 3,
+  "provider": "weblogiclogs",
+  "url": "",
+  "label": ":scroll: *WebLogic Logs (AWS us-east-1)*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "components": [],
+  "logs": {
+    "files": ["{server}_*_adminServer.out"],
+    "zeroMinutes": 5,
+    "notUpdatedMinutes": 0,
+    "ignoreOlderThanDays": 14,
+    "ignoreServers": [],
+    "impact": "major",
+    "timeZone": "Eastern Standard Time"
+  }
+}
