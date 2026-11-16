@@ -73,6 +73,8 @@ foreach ($s in $list) {
 # the vendor's status page (AWS). Removing the reaction un-acknowledges it on the next run, and
 # a resolved incident drops off the open list, so nothing needs cleaning up.
 function Get-IncidentKey($s, $i) {
+    # a reference the Slack posts carry, for incidents whose page entry hides the details (WebLogic)
+    if ($i.ref) { return "ref:$($i.ref)" }
     if ($i.url -and $i.url.TrimEnd('/') -ne ([string]$s.statusPage).TrimEnd('/')) { "url:$($i.url)" } else { "title:$($s.id):$($i.title)" }
 }
 # acknowledgements already on the previous page, to keep their "since" time (Slack doesn't
@@ -124,7 +126,7 @@ if ($open -and $SlackToken) {
         $names = @{}
         $acks = @{}
         foreach ($o in $open) {
-            $needle = if ($o.key -like 'url:*') { $o.i.url } else { $o.i.title }
+            $needle = if ($o.key -like 'ref:*') { $o.i.ref } elseif ($o.key -like 'url:*') { $o.i.url } else { $o.i.title }
             $matched = @($posts | Where-Object { $_.text.Contains($needle) })
             $users = @($matched | ForEach-Object { $_.users } | Select-Object -Unique)
             if (-not $users) { continue }

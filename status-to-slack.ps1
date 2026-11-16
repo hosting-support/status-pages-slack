@@ -259,6 +259,9 @@ function ConvertTo-Entry($i) {
         impactText = [string]$i.impactText
         affects    = @($(if ($null -ne $i.showAffects) { $i.showAffects } else { $i.affects }) | Where-Object { $_ } | ForEach-Object { [string]$_ })
         updated    = ([datetime]$i.time).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+    } | ForEach-Object {
+        # ref: matches the incident to its Slack posts when the page can't show its title or link
+        if ($i.ref) { $_.ref = [string]$i.ref }; $_
     }
 }
 $open = @($incidents | Where-Object open)
