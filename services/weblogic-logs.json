@@ -18,7 +18,8 @@
     "notUpdatedMinutes": 0,
     "ignoreOlderThanDays": 14,
     "ignoreServers": [],
-    "impact": "major",
+    "minorUpToPercent": 5,
+    "majorUpToPercent": 15,
     "timeZone": "Eastern Standard Time"
   }
 }
