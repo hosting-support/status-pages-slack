@@ -25,12 +25,12 @@
 .EXAMPLE
   .\run-weblogic-logs.ps1 -DryRun           # check now, print what would be posted, push nothing
 .EXAMPLE
-  .\run-weblogic-logs.ps1 -Install          # once: run every 2 minutes from Task Scheduler
+  .\run-weblogic-logs.ps1 -Install          # once: run every 5 minutes from Task Scheduler
 #>
 param(
     [switch] $SaveSecrets,
     [switch] $Install,
-    [int]    $EveryMinutes = 2,
+    [int]    $EveryMinutes = 5,
     [switch] $DryRun,
     [string] $Repo   = 'hosting-support/status-pages-slack',
     [string] $Branch = 'weblogic-logs-data'
