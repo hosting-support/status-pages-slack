@@ -32,7 +32,7 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         # showGroups: print "Group / Component" where the component name alone is ambiguous
         $shown = if ($Config.showGroups) {
             @($i.components | ForEach-Object { if ($_.group_id -and $groupNames[$_.group_id]) { "$($groupNames[$_.group_id]) / $($_.name)" } else { $_.name } })
-        } else { @($i.components.name) }
+        } else { @($i.components.name | Select-Object -Unique) }   # a name can repeat across groups (1Password regions)
         foreach ($u in $i.incident_updates) {
             [pscustomobject]@{
                 id         = $u.id
