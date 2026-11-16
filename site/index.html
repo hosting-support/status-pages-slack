@@ -57,12 +57,12 @@
     background: color-mix(in srgb, var(--text) 3%, var(--bg));
     border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 16px;
   }
-  .section-title { font-size: 20px; font-weight: 700; margin: 0 0 12px; }
-  /* 5 tiles per row on a wide screen, fewer as it narrows */
-  .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px; }
-  @media (max-width: 1150px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .section-title { font-size: 20px; font-weight: 700; margin: 0 0 12px; text-align: center; }
+  /* 4 tiles per row on a wide screen, fewer as it narrows */
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px; }
+  @media (max-width: 1300px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 800px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 540px)  { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 640px)  { .grid { grid-template-columns: 1fr; } }
   .card {
     --accent: var(--none);
     display: flex; flex-direction: column;
@@ -70,7 +70,14 @@
     border-radius: 10px; padding: 12px 14px; min-width: 0; min-height: var(--card-h, 0);
   }
   .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-  .card-head h2 { font-size: 16px; margin: 0; }
+  /* the name (and purpose) takes the room left of the badge */
+  .card-head h2 { font-size: 16px; margin: 0; flex: 1 1 0; min-width: 0; }
+  /* what we use the vendor for: its own full-width line under the name and badge, kept to one
+     line (cut with "..." only if a card is very narrow; the full text shows on hover) */
+  .purpose {
+    font-size: 16px; font-weight: 500; color: var(--muted); margin: 2px 0 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .card-head h2 a { text-decoration: none; }
   .card-head h2 a:hover { text-decoration: underline; }
   .badge {
@@ -187,6 +194,7 @@
     c.append(el('div', { class: 'card-head' },
       el('h2', {}, link(s.name, s.statusPage)),
       el('span', { class: 'badge' }, el('span', { class: 'dot' }), LEVELS[level].label)));
+    if (s.purpose) c.append(el('div', { class: 'purpose', textContent: s.purpose, title: s.purpose }));
 
     const sub = [];
     // the vendor's own headline; it can disagree with the badge, which follows the filters
@@ -266,14 +274,15 @@
     try {
       const data = await fetchStatus();
       const services = data.services || [];
-      const cards = services.map(s => ({ ...card(s), group: s.group || 'Other' }));
-      // sections: Core first, Other last, anything else in between; worst first within each
-      const order = (g) => g === 'Core' ? 0 : g === 'Other' ? 2 : 1;
-      const groups = [...new Set(cards.map(c => c.group))].sort((a, b) => order(a) - order(b) || a.localeCompare(b));
+      const cards = services.map(s => ({ ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99 }));
+      // sections in "groupOrder" order (from the settings files); worst first within each
+      const order = {};
+      for (const c of cards) order[c.group] = Math.min(order[c.group] ?? 99, c.order);
+      const groups = Object.keys(order).sort((a, b) => order[a] - order[b] || a.localeCompare(b));
       document.getElementById('grid').replaceChildren(...groups.map(g => {
         const list = cards.filter(c => c.group === g).sort((a, b) => LEVELS[b.level].rank - LEVELS[a.level].rank);
         return el('section', { class: 'section' },
-          el('h2', { class: 'section-title', textContent: `${g} Vendors` }),
+          el('h2', { class: 'section-title', textContent: g }),
           el('div', { class: 'grid' }, ...list.map(c => c.node)));
       }));
       evenHeights();
