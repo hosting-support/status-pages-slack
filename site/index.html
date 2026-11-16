@@ -49,17 +49,31 @@
   .health .dot { width: 9px; height: 9px; }
   .health strong { color: var(--text); font-weight: 600; }
 
-  /* one section per group (Core, Other); grid-auto-rows: 1fr makes every row as tall as the
-     tallest card, and --card-h (set by the script) evens them out across sections */
+  /* one section per group, each collapsible. Tiles in a row share that row's height (the grid
+     default), so one busy tile doesn't stretch every tile on the page */
   .sections { display: grid; gap: 24px; }
   /* each section is framed, with its title a step below the page title */
   .section {
     background: color-mix(in srgb, var(--text) 3%, var(--bg));
-    border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 16px;
+    border: 2px solid color-mix(in srgb, var(--text) 22%, var(--bg)); border-radius: 14px; padding: 12px 16px;
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--text) 10%, transparent);
   }
-  .section-title { font-size: 20px; font-weight: 700; margin: 0 0 12px; text-align: center; }
+  /* click the title to collapse a section; the choice is remembered in this browser */
+  .section > summary {
+    list-style: none; cursor: pointer; user-select: none;
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .section > summary::-webkit-details-marker { display: none; }
+  .section-title { font-size: 20px; font-weight: 700; margin: 0; text-align: center; }
+  .chevron { font-size: 14px; color: var(--muted); transition: transform .15s; }
+  .section[open] > summary .chevron { transform: rotate(90deg); }
+  .section-summary { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .section-summary .dot { width: 9px; height: 9px; }
+  .section[open] > summary .section-summary { display: none; }
+  .section[open] > .grid { margin-top: 12px; }
+  .section > summary:hover .section-title { text-decoration: underline; text-underline-offset: 4px; }
   /* 4 tiles per row on a wide screen, fewer as it narrows */
-  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 1300px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (max-width: 800px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 640px)  { .grid { grid-template-columns: 1fr; } }
@@ -67,7 +81,7 @@
     --accent: var(--none);
     display: flex; flex-direction: column;
     background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent);
-    border-radius: 10px; padding: 12px 14px; min-width: 0; min-height: var(--card-h, 0);
+    border-radius: 10px; padding: 12px 14px; min-width: 0;
   }
   .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   /* the name (and purpose) takes the room left of the badge */
@@ -101,20 +115,24 @@
   .ack-head { font-weight: 600; }
   .ack-note { margin-top: 2px; font-style: italic; white-space: pre-line; }
   /* margin-top: auto keeps "Recent incidents" at the bottom of every tile */
-  details { margin-top: auto; padding-top: 10px; font-size: 13px; }
-  summary { cursor: pointer; color: var(--muted); }
-  details ul { margin: 6px 0 0; padding-left: 18px; }
-  details li { margin: 4px 0; overflow-wrap: anywhere; }
+  .card details.recent { margin-top: auto; padding-top: 10px; font-size: 13px; }
+  .card details summary { cursor: pointer; color: var(--muted); }
+  .card details.recent ul { margin: 6px 0 0; padding-left: 18px; }
+  .card details.recent li { margin: 4px 0; overflow-wrap: anywhere; }
+  /* open incidents past the first few fold away, so one busy tile doesn't stretch every tile */
+  .card details.more { margin-top: 8px; font-size: 13px; }
+  .card details.more ul.incidents { margin-top: 8px; font-size: 15px; }
   .error { padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
 
   /* ?embed=1 : no page header, no history, tighter cards (for dashboards / iframes) */
   body.embed main { padding: 8px; }
-  body.embed header, body.embed details { display: none; }
+  body.embed header, body.embed .card details.recent { display: none; }
   body.embed .banner { padding: 8px 12px; margin-bottom: 8px; }
   body.embed .health { margin-bottom: 6px; font-size: 12px; }
   body.embed .sections { gap: 10px; }
   body.embed .section { padding: 8px 10px 10px; border-radius: 10px; }
-  body.embed .section-title { font-size: 14px; margin-bottom: 6px; }
+  body.embed .section-title { font-size: 14px; }
+  body.embed .section[open] > .grid { margin-top: 6px; }
   body.embed .grid { gap: 8px; }
   body.embed .card { padding: 10px 12px; }
 </style>
@@ -135,6 +153,11 @@
   if (params.has('embed')) document.body.classList.add('embed');
   if (params.get('theme') === 'light' || params.get('theme') === 'dark') document.documentElement.dataset.theme = params.get('theme');
 
+  const MAX_OPEN = 3;          // open incidents shown on a tile before "Show N more"
+  const expanded = new Set();  // tiles whose "Show N more" is open, kept across the minute refresh
+  // collapsed sections, remembered in this browser (storage can be unavailable; then just this visit)
+  const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem('collapsedSections') || '[]'); } catch { return []; } })());
+  const saveCollapsed = () => { try { localStorage.setItem('collapsedSections', JSON.stringify([...collapsed])); } catch {} };
   const STALE_MINUTES = 20;   // the workflow runs every 5 min; older than this means it stopped
   const LEVELS = {
     none:        { label: 'Operational',  rank: 0 },
@@ -204,14 +227,22 @@
 
     const open = s.open || [];
     if (open.length) {
-      c.append(el('ul', { class: 'incidents' }, ...open.map(incidentItem)));
+      c.append(el('ul', { class: 'incidents' }, ...open.slice(0, MAX_OPEN).map(incidentItem)));
+      if (open.length > MAX_OPEN) {
+        const more = el('details', { class: 'more' },
+          el('summary', { textContent: `Show ${open.length - MAX_OPEN} more open` }),
+          el('ul', { class: 'incidents' }, ...open.slice(MAX_OPEN).map(incidentItem)));
+        if (expanded.has(s.id)) more.open = true;
+        more.addEventListener('toggle', () => { more.open ? expanded.add(s.id) : expanded.delete(s.id); });
+        c.append(more);
+      }
     } else {
       const last = (s.recent || [])[0];
       c.append(el('div', { class: 'quiet' },
         'No open incidents', last ? el('span', {}, ' · last: ', link(last.title, last.url), ` (${ago(last.updated)})`) : null));
     }
     if ((s.recent || []).length) {
-      c.append(el('details', {}, el('summary', { textContent: `Recent incidents (${s.recent.length})` }),
+      c.append(el('details', { class: 'recent' }, el('summary', { textContent: `Recent incidents (${s.recent.length})` }),
         el('ul', {}, ...s.recent.map(r => el('li', {}, link(r.title, r.url), ` · ${r.status} · ${ago(r.updated)}`)))));
     }
     return { node: c, level };
@@ -281,11 +312,20 @@
       const groups = Object.keys(order).sort((a, b) => order[a] - order[b] || a.localeCompare(b));
       document.getElementById('grid').replaceChildren(...groups.map(g => {
         const list = cards.filter(c => c.group === g).sort((a, b) => LEVELS[b.level].rank - LEVELS[a.level].rank);
-        return el('section', { class: 'section' },
-          el('h2', { class: 'section-title', textContent: g }),
+        // shown while collapsed, so a folded section still says whether anything is wrong
+        const bad = list.filter(c => c.level !== 'none' && c.level !== 'stale');
+        const worst = bad.length ? bad[0].level : (list.some(c => c.level === 'stale') ? 'stale' : 'none');
+        const summaryText = bad.length ? `${bad.length} of ${list.length} reporting issues` : `${list.length} services, all operational`;
+        const sec = el('details', { class: 'section' },
+          el('summary', {},
+            el('span', { class: 'chevron', textContent: '▶', ariaHidden: 'true' }),
+            el('h2', { class: 'section-title', textContent: g }),
+            el('span', { class: 'section-summary', style: `--accent: ${accent(worst)}` }, el('span', { class: 'dot' }), summaryText)),
           el('div', { class: 'grid' }, ...list.map(c => c.node)));
+        sec.open = !collapsed.has(g);
+        sec.addEventListener('toggle', () => { sec.open ? collapsed.delete(g) : collapsed.add(g); saveCollapsed(); });
+        return sec;
       }));
-      evenHeights();
 
       const issues = cards.filter(c => c.level !== 'none' && c.level !== 'stale');
       const stale = cards.filter(c => c.level === 'stale');
@@ -301,17 +341,6 @@
       document.getElementById('grid').replaceChildren(el('div', { class: 'error', textContent: `Couldn't load status: ${e.message}` }));
     }
   }
-  // every tile as tall as the tallest one, across all sections
-  function evenHeights() {
-    const root = document.getElementById('grid');
-    if (!root.style || !root.querySelectorAll) return;
-    root.style.setProperty('--card-h', '0px');
-    const tallest = Math.max(0, ...[...root.querySelectorAll('.card')].map(c => c.offsetHeight));
-    root.style.setProperty('--card-h', `${tallest}px`);
-  }
-  let resizeTimer;
-  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(evenHeights, 150); });
-
   load();
   setInterval(load, 60000);
 })();
