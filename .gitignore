@@ -1,2 +1,4 @@
-state/
-cloudflare-status-state.json
+status/
+_site/
+weblogic-logs/secrets.xml
+weblogic-logs/run.log
