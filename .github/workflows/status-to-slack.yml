@@ -142,6 +142,18 @@ jobs:
           path: status
           merge-multiple: true
 
+      # WebLogic logs: checked from a machine inside CMiC's network (weblogic-logs/), which pushes
+      # its snapshot to this branch. If that machine stops, the snapshot ages and the page shows
+      # "No recent data" for it.
+      - name: Get the WebLogic logs snapshot
+        run: |
+          mkdir -p status
+          if git fetch --depth=1 origin weblogic-logs-data; then
+            git show FETCH_HEAD:weblogic-logs.json > status/weblogic-logs.json
+          else
+            echo "No weblogic-logs-data branch yet"
+          fi
+
       - name: Get the previous status
         run: |
           if git fetch --depth=1 origin status-data; then
