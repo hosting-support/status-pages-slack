@@ -59,10 +59,13 @@ foreach ($f in Get-ChildItem -Path $SnapshotDir -Filter *.json -File -ErrorActio
 # drop services whose settings file was removed
 $known = @(Get-ChildItem -Path (Join-Path $PSScriptRoot 'services') -Filter *.json | ForEach-Object BaseName)
 $list = @($services.Values | Where-Object { $_.id -in $known } | Sort-Object name)
-# the page section each service goes in ("group" in its settings file, e.g. Core / Other)
+# From each settings file, for the page: "group" (the section title), "groupOrder" (sections
+# are shown lowest first) and "purpose" (what we use the vendor for, shown after its name)
 foreach ($s in $list) {
-    $group = (Get-Content (Join-Path $PSScriptRoot "services\$($s.id).json") -Raw | ConvertFrom-Json).group
-    $s | Add-Member -NotePropertyName group -NotePropertyValue $(if ($group) { [string]$group } else { 'Other' }) -Force
+    $c = Get-Content (Join-Path $PSScriptRoot "services\$($s.id).json") -Raw | ConvertFrom-Json
+    $s | Add-Member -NotePropertyName group -NotePropertyValue $(if ($c.group) { [string]$c.group } else { 'Other Vendors' }) -Force
+    $s | Add-Member -NotePropertyName groupOrder -NotePropertyValue $(if ($null -ne $c.groupOrder) { [int]$c.groupOrder } else { 99 }) -Force
+    $s | Add-Member -NotePropertyName purpose -NotePropertyValue ([string]$c.purpose) -Force
 }
 
 # ---- acknowledgements from Slack reactions ----

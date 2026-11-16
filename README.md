@@ -18,6 +18,8 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Jira | https://jira-software.status.atlassian.com | `services/jira.json` | `SLACK_WEBHOOK_URL_JIRA` | `JIRA_` |
 | Microsoft (Microsoft 365 + Azure) | https://status.cloud.microsoft | `services/microsoft.json` | `SLACK_WEBHOOK_URL_MICROSOFT` | `MS_` |
 | Claude | https://status.claude.com | `services/claude.json` | `SLACK_WEBHOOK_URL_CLAUDE` | `CLAUDE_` |
+| Luciq | https://statuspage.luciq.ai | `services/luciq.json` | `SLACK_WEBHOOK_URL_LUCIQ` | `LUCIQ_` |
+| 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
 
 ## How it fits together
 
@@ -95,8 +97,9 @@ What `categories` matches, and what the impact levels mean, per service:
 ## Status page
 
 Every run also publishes a one-page overview of all services to GitHub Pages:
-`https://<your-user>.github.io/<repo>/`. Services are split into sections by `"group"` in their
-settings file (Core Vendors first, then Other Vendors). One card per service, worst first, each with its open
+`https://<your-user>.github.io/<repo>/`. Services are split into sections by
+`"group"` in their settings file (the section title), ordered by `"groupOrder"`, and each card
+shows `"purpose"` after the vendor's name (e.g. "AWS - SaaS (Public Cloud Environments)"). One card per service, worst first, each with its open
 incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
 every minute. A service whose data is over 20 minutes old shows as "No recent data".
 
