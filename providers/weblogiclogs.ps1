@@ -3,9 +3,11 @@
 # not in GitHub Actions. Its address comes from the WEBLOGIC_LOGS_URL environment variable, set
 # by the runner, so it isn't in this public repository.
 #
-# The repository and status page are public, so server names go to Slack only. The page gets
-# one entry per server with a reference instead (e.g. "Server logs not updating (WL-3f9a2c)"),
-# and the Slack posts carry the same reference, so a check-mark reaction still acknowledges it.
+# The repository and status page are public, so server names go to Slack only (one post when a
+# server's logs stop, one when they come back). The page shows just a count, "3 of 47 servers'
+# logs not updating (6%)", and the tile's level follows the share of servers affected:
+# up to 5% minor, up to 15% major, above that critical. The count can't be acknowledged with a
+# Slack reaction, so a growing outage can't hide behind an earlier acknowledgement.
 #
 # A server's logs count as "not updating" when a watched file (by default the server's
 # <server>_*_adminServer.out, which WebLogic writes to every minute or so) is 0 bytes and hasn't
@@ -18,7 +20,8 @@
 #   notUpdatedMinutes   also flag a file with data that hasn't changed for this long (0 = off)
 #   ignoreOlderThanDays files untouched for longer are treated as a retired server (default 14)
 #   ignoreServers       folder names (wildcards) to skip, e.g. servers being rebuilt
-#   impact              minor | major | critical for an open incident (default major)
+#   minorUpToPercent    share of servers not updating that's still "minor" (default 5)
+#   majorUpToPercent    up to this share it's "major"; above it "critical" (default 15)
 #   timeZone            time zone of the listing's dates (default Eastern)
 
 function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
@@ -31,9 +34,8 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $quietMin     = $(if ($null -ne $o.notUpdatedMinutes) { [double]$o.notUpdatedMinutes } else { 0 })
     $retiredDays  = $(if ($null -ne $o.ignoreOlderThanDays) { [double]$o.ignoreOlderThanDays } else { 14 })
     $ignore       = @($o.ignoreServers | Where-Object { $_ })
-    $impact       = $(if ($o.impact) { [string]$o.impact } else { 'major' })
-    $color        = @{ minor = 'yellow'; major = 'orange'; critical = 'red' }[$impact]
-    if (-not $color) { $color = 'orange' }
+    $minorUpTo    = $(if ($null -ne $o.minorUpToPercent) { [double]$o.minorUpToPercent } else { 5 })
+    $majorUpTo    = $(if ($null -ne $o.majorUpToPercent) { [double]$o.majorUpToPercent } else { 15 })
 
     # the listing shows the server's local time; Windows PowerShell only knows Windows zone names
     $tz = $null
@@ -64,21 +66,6 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     function ConvertTo-Utc($v) {
         if ($v -is [datetime]) { if ($v.Kind -eq 'Local') { $v.ToUniversalTime() } else { [datetime]::SpecifyKind($v, 'Utc') } }
         else { [datetimeoffset]::Parse([string]$v, $culture, [Globalization.DateTimeStyles]::AssumeUniversal).UtcDateTime }
-    }
-    # short reference for the page, the same on every run for one occurrence
-    function Get-Ref($server, $since) {
-        $sha = [Security.Cryptography.SHA1]::Create()
-        $hash = $sha.ComputeHash([Text.Encoding]::UTF8.GetBytes("$server|$since"))
-        'WL-' + (-join ($hash[0..2] | ForEach-Object { $_.ToString('x2') }))
-    }
-    # what the public page shows: no server names, no internal links
-    function ConvertTo-PageIncident($u, $ref, [bool]$isOpen) {
-        [pscustomobject]@{
-            key = $ref; ref = $ref; open = $isOpen
-            title = "Server logs not updating ($ref)"; url = ''
-            kind = $u.kind; status = $u.status; color = $u.color; time = $u.time
-            impact = $u.impact; impactText = $u.impactText; affects = @()
-        }
     }
     function Format-Local($utc) { [TimeZoneInfo]::ConvertTimeFromUtc($utc, $tz).ToString('MMM d HH:mm', $culture) + ' ET' }
 
@@ -133,10 +120,16 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         }
     }
 
-    $updates = @(); $incidents = @()
+    # level from the share of servers not updating, rounded to a whole percent
+    $pct = if ($checked) { [Math]::Round(100 * $open.Count / $checked) } else { 0 }
+    $impact = if (-not $open.Count) { 'none' } elseif ($pct -le $minorUpTo) { 'minor' } elseif ($pct -le $majorUpTo) { 'major' } else { 'critical' }
+    $color  = @{ none = 'green'; minor = 'yellow'; major = 'orange'; critical = 'red' }[$impact]
+
+    # Slack: one post per server when its logs stop, colored by the overall level at the time
+    $updates = @()
     foreach ($s in $open.Values) {
         $since = ConvertTo-Utc $s.since
-        $u = [pscustomobject]@{
+        $updates += [pscustomobject]@{
             id         = "stale|$($s.server)|$($s.since)"
             time       = $since.ToString('o')
             kind       = 'Incident'
@@ -145,20 +138,16 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
             status     = 'Detected'
             color      = $color
             impact     = $impact
-            impactText = 'Logs not updating'
+            impactText = "$($open.Count) of $checked servers ($pct%)"
             affects    = @($s.files)
-            body       = "$($s.detail)`nFor $(Format-Age ($now - $since)). Status page ref: $(Get-Ref $s.server $s.since)"
+            body       = "$($s.detail)`nFor $(Format-Age ($now - $since))."
         }
-        $updates += $u
-        $incidents += ConvertTo-PageIncident $u (Get-Ref $s.server $s.since) $true
     }
-
-    # recovered since the last run: post once, and list it on the page for a day
-    $recent = @($Saved.recent | Where-Object { $_.update -and ($now - (ConvertTo-Utc $_.update.time)).TotalHours -lt 24 })
+    # ... and one when they come back (only in this run's feed, so it's never posted twice)
     foreach ($p in $previous.Values) {
         if ($open.ContainsKey([string]$p.server)) { continue }
         $since = ConvertTo-Utc $p.since
-        $r = [pscustomobject]@{
+        $updates += [pscustomobject]@{
             id         = "ok|$($p.server)|$($p.since)"
             time       = $now.ToString('o')
             kind       = 'Incident'
@@ -166,30 +155,37 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
             url        = $p.url
             status     = 'Resolved'
             color      = 'green'
-            impact     = $impact
-            impactText = 'Logs not updating'
+            impact     = 'none'
+            impactText = "$($open.Count) of $checked servers still not updating"
             affects    = @($p.files)
-            body       = "Logs are being written again. They stopped for $(Format-Age ($now - $since)). Status page ref: $(Get-Ref $p.server $p.since)"
+            body       = "Logs are being written again. They stopped for $(Format-Age ($now - $since))."
         }
-        $updates += $r
-        $recent = @([pscustomobject]@{ ref = (Get-Ref $p.server $p.since); update = $r }) + $recent
     }
-    $recent = @($recent | Where-Object { $_.ref } | Select-Object -First 10)
-    $incidents += @($recent | ForEach-Object { ConvertTo-PageIncident $_.update $_.ref $false })
 
     if ($failed) { Write-Host "Couldn't read $($failed.Count) folder(s): $($failed -join ', ')" }
-    Write-Host "Checked $checked servers ($retired retired, skipped): $($open.Count) not updating"
+    Write-Host "Checked $checked servers ($retired retired, skipped): $($open.Count) not updating ($pct%, $impact)"
     if (-not $checked -and -not $failed) { throw "No server folders with watched files found at $base" }
 
-    $overall = if ($open.Count) {
-        @{ indicator = $impact; description = "$($open.Count) of $checked servers' logs not updating" }
-    } else { @{ indicator = 'none'; description = "All $checked servers' logs updating" } }
+    # The page: one entry with the count, no server names. Its "since" is the oldest open one.
+    $incidents = @()
+    if ($open.Count) {
+        $oldest = ($open.Values | ForEach-Object { ConvertTo-Utc $_.since } | Sort-Object | Select-Object -First 1)
+        $incidents += [pscustomobject]@{
+            key = 'weblogic-count'; open = $true; url = ''; affects = @()
+            title      = "$($open.Count) of $checked servers' logs not updating ($pct%)"
+            kind       = 'Incident'
+            status     = 'Detected'
+            color      = $color
+            impact     = $impact
+            impactText = ''
+            time       = $oldest.ToString('o')
+        }
+    }
 
     @{
-        overall   = $overall
+        overall   = $null      # the count above says it; the tile has no vendor headline
         updates   = $updates
         incidents = $incidents
-        # the "Resolved" updates are only in this run's feed, so they're never posted twice
-        extra     = @{ open = @($open.Values); recent = $recent }
+        extra     = @{ open = @($open.Values) }
     }
 }
