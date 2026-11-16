@@ -1,6 +1,8 @@
 {
   "name": "OCI (Oracle Cloud Infrastructure)",
-  "group": "Core",
+  "purpose": "PaaS (Enterprise Hosted Customers)",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
   "provider": "oci",
   "url": "https://ocistatus.oraclecloud.com",
   "label": ":classical_building: *OCI Status*",

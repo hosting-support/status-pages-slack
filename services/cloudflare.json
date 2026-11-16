@@ -1,6 +1,8 @@
 {
   "name": "Cloudflare",
-  "group": "Core",
+  "purpose": "All Hosted Environments",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
   "provider": "statuspage",
   "url": "https://www.cloudflarestatus.com",
   "label": ":cloud: *Cloudflare Status*",

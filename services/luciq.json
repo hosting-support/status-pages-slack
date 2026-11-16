@@ -1,0 +1,15 @@
+{
+  "name": "Luciq",
+  "purpose": "Mobile Apps Bug Reporting",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
+  "provider": "statuspage",
+  "url": "https://statuspage.luciq.ai",
+  "label": ":iphone: *Luciq Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": []
+}

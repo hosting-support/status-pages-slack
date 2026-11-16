@@ -1,6 +1,8 @@
 {
   "name": "AWS",
-  "group": "Core",
+  "purpose": "SaaS (Public Cloud Environments)",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
   "provider": "aws",
   "url": "https://health.aws.amazon.com/health/status",
   "label": ":package: *AWS Health*",

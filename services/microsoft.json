@@ -1,9 +1,11 @@
 {
   "name": "Microsoft",
+  "purpose": "SSO",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
   "provider": "microsoft",
   "url": "https://status.cloud.microsoft",
   "label": ":office: *Microsoft Status*",
-  "group": "Other",
   "categories": ["Microsoft 365", "Azure"],
   "minImpact": "none",
   "skipUntagged": false,

@@ -1,6 +1,8 @@
 {
   "name": "Slack",
-  "group": "Other",
+  "purpose": "AI, Collaboration",
+  "group": "Vendors Used Internally",
+  "groupOrder": 2,
   "provider": "slack",
   "url": "https://slack-status.com",
   "label": ":speech_balloon: *Slack Status*",

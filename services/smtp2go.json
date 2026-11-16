@@ -1,6 +1,8 @@
 {
   "name": "SMTP2GO",
-  "group": "Core",
+  "purpose": "Emailing (All Hosted Environments)",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
   "provider": "statuspage",
   "url": "https://smtp2gostatus.com",
   "label": ":email: *SMTP2GO Status*",

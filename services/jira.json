@@ -1,6 +1,8 @@
 {
   "name": "Jira",
-  "group": "Other",
+  "purpose": "Programming",
+  "group": "Vendors Used Internally",
+  "groupOrder": 2,
   "provider": "statuspage",
   "url": "https://jira-software.status.atlassian.com",
   "label": ":ticket: *Jira Status*",
