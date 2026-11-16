@@ -59,8 +59,15 @@ if ($SaveSecrets) {
 }
 
 if ($Install) {
-    $action  = New-ScheduledTaskAction -Execute 'powershell.exe' `
-               -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -WorkingDirectory $PSScriptRoot
+    # No window popping up every run: Windows 11's conhost.exe --headless starts PowerShell with no
+    # console at all. Older Windows falls back to -WindowStyle Hidden, which still flashes briefly.
+    $ps = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    $headless = [Environment]::OSVersion.Version.Build -ge 22000
+    $action  = if ($headless) {
+                   New-ScheduledTaskAction -Execute 'conhost.exe' -Argument "--headless powershell.exe $ps" -WorkingDirectory $PSScriptRoot
+               } else {
+                   New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-WindowStyle Hidden $ps" -WorkingDirectory $PSScriptRoot
+               }
     $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
                -RepetitionInterval (New-TimeSpan -Minutes $EveryMinutes)   # no duration = repeats indefinitely
     $settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -StartWhenAvailable `
