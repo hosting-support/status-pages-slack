@@ -51,7 +51,8 @@ param(
     [string] $StateFile  = (Join-Path $PSScriptRoot "state\$Service.json"),
     [string] $SnapshotFile = (Join-Path $PSScriptRoot "status\$Service.json"),   # for the status page
     [switch] $DryRun,                        # print messages instead of posting
-    [switch] $TestPost                       # also post the newest update, to preview the format
+    [switch] $TestPost,                      # also post the newest update, to preview the format
+    [switch] $Mute                           # alerts paused: work out and record changes as usual, post nothing
 )
 
 $ErrorActionPreference = 'Stop'
@@ -224,7 +225,9 @@ if ($Components.Count -and $feed.components) {
 }
 
 # ---- send + save ----
-foreach ($m in $messages) { Send-Slack $m.text $m.color }
+# muted: the changes still count as posted, so nothing floods in when alerts resume
+if ($Mute) { if ($messages.Count) { Write-Host "Alerts paused: $($messages.Count) message(s) not posted" } }
+else       { foreach ($m in $messages) { Send-Slack $m.text $m.color } }
 
 # keep only ids still present in the feed so the state file doesn't grow forever
 # (keepIds: updates the provider knows about but skipped fetching this time)
@@ -286,4 +289,4 @@ New-Item -ItemType Directory -Force -Path (Split-Path $SnapshotFile) | Out-Null
 
 $statusText = if ($feed.overall) { $feed.overall.description } else { "$($updates.Count) updates in feed" }
 if ($firstRun) { Write-Host "First run: saved baseline ($statusText, $($seen.Count) updates). Nothing posted." }
-else           { Write-Host "Posted $($messages.Count) message(s). Status: $statusText" }
+else           { Write-Host "Posted $(if ($Mute) { 0 } else { $messages.Count }) message(s). Status: $statusText" }
