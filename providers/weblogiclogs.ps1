@@ -174,7 +174,8 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
             key = 'weblogic-count'; open = $true; url = ''; affects = @()
             title      = "$($open.Count) of $checked servers' logs not updating ($pct%)"
             kind       = 'Incident'
-            status     = 'Detected'
+            # the runner sets this while Slack alerts are paused, e.g. "Slack alerts paused until Nov 17 15:00 ET"
+            status     = $(if ($env:WEBLOGIC_ALERTS_PAUSED) { $env:WEBLOGIC_ALERTS_PAUSED } else { 'Detected' })
             color      = $color
             impact     = $impact
             impactText = ''
