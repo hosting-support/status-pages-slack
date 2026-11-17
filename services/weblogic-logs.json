@@ -21,5 +21,10 @@
     "minorUpToPercent": 5,
     "majorUpToPercent": 15,
     "timeZone": "Eastern Standard Time"
+  },
+  "pause": {
+    "channel": "hostingsupport",
+    "defaultHours": 4,
+    "maxHours": 72
   }
 }
