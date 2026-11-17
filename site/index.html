@@ -154,6 +154,7 @@
   if (params.get('theme') === 'light' || params.get('theme') === 'dark') document.documentElement.dataset.theme = params.get('theme');
 
   const MAX_OPEN = 3;          // open incidents shown on a tile before "Show N more"
+  const BANNER_SKIPS = ['CMiC Internal Checks'];   // sections the top banner leaves out
   const expanded = new Set();  // tiles whose "Show N more" is open, kept across the minute refresh
   // collapsed sections, remembered in this browser (storage can be unavailable; then just this visit)
   const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem('collapsedSections') || '[]'); } catch { return []; } })());
@@ -327,12 +328,14 @@
         return sec;
       }));
 
-      const issues = cards.filter(c => c.level !== 'none' && c.level !== 'stale');
-      const stale = cards.filter(c => c.level === 'stale');
-      const worst = cards.reduce((w, c) => LEVELS[c.level].rank > LEVELS[w].rank && c.level !== 'stale' ? c.level : w, 'none');
+      // the banner sums up the vendors only; CMiC's own checks have their own section
+      const vendors = cards.filter(c => !BANNER_SKIPS.includes(c.group));
+      const issues = vendors.filter(c => c.level !== 'none' && c.level !== 'stale');
+      const stale = vendors.filter(c => c.level === 'stale');
+      const worst = vendors.reduce((w, c) => LEVELS[c.level].rank > LEVELS[w].rank && c.level !== 'stale' ? c.level : w, 'none');
       const banner = document.getElementById('banner');
       banner.style.setProperty('--accent', accent(issues.length ? worst : (stale.length ? 'stale' : 'none')));
-      let text = issues.length ? `${issues.length} of ${cards.length} services reporting issues` : `All ${cards.length} services operational`;
+      let text = issues.length ? `${issues.length} of ${vendors.length} vendors reporting issues` : `All ${vendors.length} vendors operational`;
       if (stale.length) text += ` · ${stale.length} not checked recently`;
       document.getElementById('banner-text').textContent = text;
       banner.hidden = false;
