@@ -1,0 +1,25 @@
+{
+    "id":  "weblogic-logs",
+    "name":  "WebLogic Logs",
+    "statusPage":  "",
+    "checkedAt":  "2026-11-20T22:08:30Z",
+    "level":  "critical",
+    "overall":  null,
+    "open":  [
+                 {
+                     "title":  "39 of 47 servers\u0027 logs not updating (83%)",
+                     "url":  "",
+                     "kind":  "Incident",
+                     "status":  "Detected",
+                     "impact":  "critical",
+                     "impactText":  "",
+                     "affects":  [
+
+                                 ],
+                     "updated":  "2026-11-14T05:36:00Z"
+                 }
+             ],
+    "recent":  [
+
+               ]
+}
