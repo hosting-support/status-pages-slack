@@ -1,0 +1,701 @@
+{
+  "generatedAt": "2026-11-21T14:21:01Z",
+  "run": {
+    "trigger": "workflow_dispatch",
+    "url": "https://github.com/hosting-support/status-pages-slack/actions/runs/44913401282",
+    "lastSchedulerAt": "2026-11-21T14:21:01Z"
+  },
+  "services": [
+    {
+      "id": "1password",
+      "name": "1Password",
+      "statusPage": "https://status.1password.com",
+      "checkedAt": "2026-11-21T14:20:28Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Degraded Device Trust Authentication Experience",
+          "url": "https://stspg.io/bbbxnt19cvgp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Device Trust Authentication Service"
+          ],
+          "updated": "2026-11-16T18:21:55Z"
+        },
+        {
+          "title": "High error rate on 1Password.com",
+          "url": "https://stspg.io/5vnxqln1xmdn",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Admin console"
+          ],
+          "updated": "2026-10-29T19:35:12Z"
+        },
+        {
+          "title": "Some users are unable to view vault profiles using the web interface",
+          "url": "https://stspg.io/9037pn59hmjn",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Admin console"
+          ],
+          "updated": "2026-10-16T17:42:07Z"
+        },
+        {
+          "title": "Device Trust Service Disruption",
+          "url": "https://stspg.io/9sjwgt4v11kr",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Device Trust Authentication Service"
+          ],
+          "updated": "2026-09-09T21:11:08Z"
+        },
+        {
+          "title": "Account governance functions are unavailable in SaaS Manager",
+          "url": "https://stspg.io/9bt7rtjljklp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "SaaS Manager"
+          ],
+          "updated": "2026-07-22T19:20:54Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Password Management"
+    },
+    {
+      "id": "aws",
+      "name": "AWS",
+      "statusPage": "https://health.aws.amazon.com/health/status",
+      "checkedAt": "2026-11-21T14:20:30Z",
+      "level": "none",
+      "overall": null,
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "SaaS (Public Cloud Environments)"
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "statusPage": "https://status.claude.com",
+      "checkedAt": "2026-11-21T14:20:31Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Elevated errors for Claude Mythos 5.2 and Claude Fable 5.2",
+          "url": "https://stspg.io/nlb5fptv28h5",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai",
+            "Claude API (api.anthropic.com)",
+            "Claude Code",
+            "Claude Cowork"
+          ],
+          "updated": "2026-11-19T09:33:18Z"
+        },
+        {
+          "title": "Claude Meetings auto-join limited on the Team plan",
+          "url": "https://stspg.io/01qq3kzyyqzl",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "claude.ai"
+          ],
+          "updated": "2026-11-19T02:15:05Z"
+        },
+        {
+          "title": "Elevated errors affecting the Google Docs connector",
+          "url": "https://stspg.io/qz7tfhb7sl68",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "claude.ai"
+          ],
+          "updated": "2026-11-18T01:44:40Z"
+        },
+        {
+          "title": "Some users unable to sign in with Apple on claude.ai and the Claude iOS app",
+          "url": "https://stspg.io/3tl6h35nnzwm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai"
+          ],
+          "updated": "2026-11-17T21:51:09Z"
+        },
+        {
+          "title": "Some users unable to sign up with Apple on the Claude iOS app",
+          "url": "https://stspg.io/4858wf40dx89",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai"
+          ],
+          "updated": "2026-11-16T19:52:36Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "AI"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "statusPage": "https://www.cloudflarestatus.com",
+      "checkedAt": "2026-11-21T14:20:34Z",
+      "level": "none",
+      "overall": {
+        "indicator": "minor",
+        "description": "Partially Degraded Service"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Network Performance Issues in Washington, DC datacenter (IAD)",
+          "url": "https://www.cloudflarestatus.com/incidents/oz6to8yacrxe",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Network"
+          ],
+          "updated": "2026-11-21T07:44:10Z"
+        },
+        {
+          "title": "Cache Purging Delays in Milan",
+          "url": "https://www.cloudflarestatus.com/incidents/akjr7qn5o622",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "CDN Cache Purge"
+          ],
+          "updated": "2026-11-20T22:25:16Z"
+        },
+        {
+          "title": "Cache Purging Delays in Amsterdam",
+          "url": "https://www.cloudflarestatus.com/incidents/xsgbfncq7of7",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "CDN Cache Purge"
+          ],
+          "updated": "2026-11-20T19:41:49Z"
+        },
+        {
+          "title": "Cloudflare Dashboard and Cloudflare API service issues in EU region",
+          "url": "https://www.cloudflarestatus.com/incidents/iysf3fasf7wn",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [],
+          "updated": "2026-11-20T18:53:14Z"
+        },
+        {
+          "title": "Network Performance Issues in Miami",
+          "url": "https://www.cloudflarestatus.com/incidents/4lv21sf5fzhm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Miami, United States - (MIA)"
+          ],
+          "updated": "2026-11-20T14:28:03Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "All Hosted Environments"
+    },
+    {
+      "id": "dynatrace",
+      "name": "Dynatrace",
+      "statusPage": "https://dynatrace.status.io",
+      "checkedAt": "2026-11-21T14:20:25Z",
+      "level": "major",
+      "overall": {
+        "indicator": "major",
+        "description": "Partial service disruption: Dynatrace Managed"
+      },
+      "open": [
+        {
+          "title": "Host and Process Availability Monitoring Issue on Managed Version 1.350",
+          "url": "https://dynatrace.status.io/pages/incident/546d8cb6af8407b6730000cb/6b003690029e162d41012f29",
+          "kind": "Incident",
+          "status": "Monitoring",
+          "impact": "major",
+          "impactText": "Partial service disruption",
+          "affects": [
+            "Dynatrace Managed"
+          ],
+          "updated": "2026-11-20T21:52:15Z"
+        }
+      ],
+      "recent": [],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Observability & Monitoring"
+    },
+    {
+      "id": "jira",
+      "name": "Jira",
+      "statusPage": "https://jira-software.status.atlassian.com",
+      "checkedAt": "2026-11-21T14:20:34Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Degraded performance with Microsoft incoming emails",
+          "url": "https://stspg.io/04d806qrqrr4",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Create and edit"
+          ],
+          "updated": "2026-11-14T06:07:30Z"
+        },
+        {
+          "title": "Fields missing across Jira Work Items for some users",
+          "url": "https://stspg.io/4vbvrxgbbzsk",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Viewing content",
+            "Search",
+            "Automation for Jira"
+          ],
+          "updated": "2026-11-02T00:38:50Z"
+        },
+        {
+          "title": "Jira - Project Sidebar Loading Degradation",
+          "url": "https://stspg.io/czwk831b76lg",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Viewing content"
+          ],
+          "updated": "2026-10-21T15:45:09Z"
+        },
+        {
+          "title": "Job processing and scheduling is degraded affecting multiple Atlassian products",
+          "url": "https://stspg.io/037ndsk7y1d4",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Notifications",
+            "Automation for Jira"
+          ],
+          "updated": "2026-10-09T18:24:30Z"
+        },
+        {
+          "title": "Degraded Performance Viewing Issues and Boards",
+          "url": "https://stspg.io/d356gxdfnsjm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Viewing content",
+            "Create and edit"
+          ],
+          "updated": "2026-09-24T15:53:04Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Programming"
+    },
+    {
+      "id": "luciq",
+      "name": "Luciq",
+      "statusPage": "https://statuspage.luciq.ai",
+      "checkedAt": "2026-11-21T14:20:38Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Partially dashboard degradation",
+          "url": "https://stspg.io/j63k7vqwk603",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [],
+          "updated": "2026-09-13T17:44:03Z"
+        },
+        {
+          "title": "Elevated latency and delayed data loading",
+          "url": "https://stspg.io/m8m304lvwshy",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Core",
+            "DSYM Upload",
+            "Web App",
+            "APM",
+            "Crashes",
+            "Surveys & Announcements",
+            "Bugs",
+            "Session Replay",
+            "Feature Requests",
+            "Chats",
+            "App Health"
+          ],
+          "updated": "2026-07-08T13:51:46Z"
+        },
+        {
+          "title": "Delayed Data Processing",
+          "url": "https://stspg.io/phg3mgm6byrg",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-06-11T15:39:42Z"
+        },
+        {
+          "title": "Service Disruption",
+          "url": "https://stspg.io/dbkk82wb6b50",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [],
+          "updated": "2026-06-04T11:47:46Z"
+        },
+        {
+          "title": "Data ingestion is down",
+          "url": "https://stspg.io/rvdjplb3r2pp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Web App",
+            "APM"
+          ],
+          "updated": "2025-11-23T20:13:28Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Mobile Apps Bug Reporting"
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "statusPage": "https://status.cloud.microsoft",
+      "checkedAt": "2026-11-21T14:20:34Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "Microsoft 365 and Azure available"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "SSO"
+    },
+    {
+      "id": "oci",
+      "name": "OCI (Oracle Cloud Infrastructure)",
+      "statusPage": "https://ocistatus.oraclecloud.com",
+      "checkedAt": "2026-11-21T14:20:32Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "Normal Performance"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "PaaS (Enterprise Hosted Customers)"
+    },
+    {
+      "id": "salesforce",
+      "name": "Salesforce",
+      "statusPage": "https://status.salesforce.com/instances/CAN36",
+      "checkedAt": "2026-11-21T14:20:30Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "CAN36 operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Degradation: Experience Cloud on CAN36",
+          "url": "https://status.salesforce.com/incidents/20004568",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Degradation (minor)",
+          "affects": [
+            "Experience Cloud"
+          ],
+          "updated": "2026-11-04T15:01:51Z"
+        },
+        {
+          "title": "Disruption: Core service on CAN36",
+          "url": "https://status.salesforce.com/incidents/20004521",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "Disruption (major)",
+          "affects": [
+            "Core service"
+          ],
+          "updated": "2026-10-23T06:46:57Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Support Portal, Chat"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "statusPage": "https://slack-status.com",
+      "checkedAt": "2026-11-21T14:20:28Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All systems operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Trouble loading Slack and saving changes.",
+          "url": "https://slack-status.com/2026-11/b8bb993128ac94f5",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Connectivity",
+            "Messaging",
+            "Apps/Integrations/APIs",
+            "Workspace/Org Administration"
+          ],
+          "updated": "2026-11-11T18:58:05Z"
+        },
+        {
+          "title": "Slack Real-Time Connection Disruption",
+          "url": "https://slack-status.com/2026-10/58a30c7fc8aa3e80",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Messaging"
+          ],
+          "updated": "2026-10-22T18:50:50Z"
+        },
+        {
+          "title": "Single Sign On errors",
+          "url": "https://slack-status.com/2026-10/6aeafd6248f59a8a",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Login/SSO"
+          ],
+          "updated": "2026-10-14T00:23:07Z"
+        },
+        {
+          "title": "Slack for iOS closing unexpectedly when opening channels",
+          "url": "https://slack-status.com/2026-10/a0cfb0208a1d2032",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Connectivity"
+          ],
+          "updated": "2026-10-12T17:03:31Z"
+        },
+        {
+          "title": "Free Plan Customers Are Experiencing Message Failures",
+          "url": "https://slack-status.com/2026-10/6c28dfb7b670dc02",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Messaging"
+          ],
+          "updated": "2026-10-01T18:59:35Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "AI, Collaboration"
+    },
+    {
+      "id": "smtp2go",
+      "name": "SMTP2GO",
+      "statusPage": "https://smtp2gostatus.com",
+      "checkedAt": "2026-11-21T14:20:27Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Delivery Delays: Outlook and Gmail",
+          "url": "https://stspg.io/pt0s7byj094c",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "Email sending (SMTP service)"
+          ],
+          "updated": "2026-11-13T22:00:16Z"
+        },
+        {
+          "title": "API Error",
+          "url": "https://stspg.io/j46btb0j8grd",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "API Servers"
+          ],
+          "updated": "2026-10-30T23:20:09Z"
+        },
+        {
+          "title": "Softbounce Errors",
+          "url": "https://stspg.io/8933gtyrk3g1",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Email sending (SMTP service)"
+          ],
+          "updated": "2026-10-15T17:23:47Z"
+        },
+        {
+          "title": "Issues with API- statusCode=500",
+          "url": "https://stspg.io/vskq5k5sqwkm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "API Servers"
+          ],
+          "updated": "2026-10-08T09:54:25Z"
+        },
+        {
+          "title": "Connectivity Issues",
+          "url": "https://stspg.io/k48rg1mfnwfw",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Email sending (SMTP service)"
+          ],
+          "updated": "2026-10-01T21:04:03Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Emailing (All Hosted Environments)"
+    },
+    {
+      "id": "weblogic-logs",
+      "name": "WebLogic Logs",
+      "statusPage": "",
+      "checkedAt": "2026-11-20T22:08:30Z",
+      "level": "critical",
+      "overall": null,
+      "open": [
+        {
+          "title": "39 of 47 servers' logs not updating (83%)",
+          "url": "",
+          "kind": "Incident",
+          "status": "Detected",
+          "impact": "critical",
+          "impactText": "",
+          "affects": [],
+          "updated": "2026-11-14T05:36:00Z"
+        }
+      ],
+      "recent": [],
+      "group": "CMiC Internal Checks",
+      "groupOrder": 3,
+      "purpose": "AWS SaaS server logs"
+    }
+  ]
+}
