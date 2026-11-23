@@ -1,7 +1,7 @@
 # Status pages to Slack
 
 A GitHub Actions workflow that checks vendor status pages every 5 minutes and posts to Slack
-(one channel per service) when:
+(#hostingsupport, through a separate Slack app per vendor) when:
 
 - the overall status changes (where the page has one)
 - an incident gets a new update (investigating / identified / monitoring / resolved)
@@ -20,6 +20,32 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Claude | https://status.claude.com | `services/claude.json` | `SLACK_WEBHOOK_URL_CLAUDE` | `CLAUDE_` |
 | Luciq | https://statuspage.luciq.ai | `services/luciq.json` | `SLACK_WEBHOOK_URL_LUCIQ` | `LUCIQ_` |
 | 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
+
+## Accounts: where this lives and who can change it
+
+This project is **not** in CMiC's company GitHub (CMiC-Hosting-Support / CMiC-Workspace).
+It's in **`hosting-support`**, a separate, free GitHub organization outside CMiC's enterprise,
+because it has to stay public: the status page reads its data from this public repository,
+and public repositories get GitHub Actions minutes for free. CMiC's enterprise only allows
+private or internal repositories, and it bills their Actions minutes.
+
+| What | Where | Sign in as |
+|---|---|---|
+| This repository, its settings and secrets | https://github.com/hosting-support/status-pages-slack | a personal GitHub account that's an owner of `hosting-support` (today: `nlazarevski`) |
+| GitHub App the Worker signs in with ("Status Pages Trigger") | `hosting-support` → **Settings** → **GitHub Apps** | same |
+| 5-minute timer (Worker `status-pages-trigger`) | Cloudflare account `novica-lazarevski.workers.dev` | that Cloudflare account's login |
+| Status page | https://hosting-support.github.io/status-pages-slack/ | nobody, it's public |
+| Slack posts and ✅ acknowledgements | #hostingsupport (one Slack app per vendor, plus "Status Acknowledgements") | Slack |
+
+**Check which GitHub account you're signed in as.** If GitHub shows **"Users managed by
+ComputerMethods"** at the top right, you're on a CMiC company account. That account can see
+this public repo but can't change it: there's no **Add file** button and no **Settings** tab,
+and the hosting-support settings pages show a 404. Switch to your personal account. Keeping
+each account in its own browser profile avoids mix-ups.
+
+To help maintain it, a teammate needs a personal GitHub account added to `hosting-support`
+(**People** → **Invite member**). Viewing the page or acknowledging incidents in Slack needs
+no GitHub account.
 
 ## How it fits together
 
