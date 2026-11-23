@@ -143,10 +143,18 @@ GitHub's own schedule is best-effort: on this repo it ran every 3-8 hours instea
 5 minutes through GitHub's API, the same as pressing **Run workflow**. The workflow's own
 hourly schedule stays as a backup in case the Worker stops.
 
-The Worker needs a secret `GITHUB_TOKEN`: a fine-grained GitHub token limited to this
-repository with **Actions: Read and write**. When the token expires, the Worker's logs show
-`GitHub returned 401` and runs fall back to the hourly schedule; create a new token and update
-the secret.
+The Worker signs in as a **GitHub App** owned by the hosting-support org ("Status Pages
+Trigger"), so nothing expires. The app has one permission, **Actions: Read and write**, and is
+installed on this repository only. The Worker's secrets are `GITHUB_APP_ID` (the App ID) and
+`GITHUB_APP_PRIVATE_KEY` (the whole `.pem` file from the app's **Generate a private key**).
+On each run it signs a short-lived JWT with the key and swaps it for a 1-hour token.
+
+If the Worker's logs show an error, its message says which step failed: finding the app's
+installation (404 = the app isn't installed on this repository), getting a token, or starting
+the workflow. To replace the key, generate a new one on the app's settings page, update the
+secret, then delete the old key there. Without the two app secrets the Worker falls back to a
+`GITHUB_TOKEN` secret (a fine-grained personal token with the same permission), which is how it
+worked before.
 
 This only works for a public repo on a free account: a private repo would run out of the
 2,000 free Actions minutes a month within a few days.
