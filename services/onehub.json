@@ -1,0 +1,24 @@
+{
+  "name": "Onehub",
+  "purpose": "CMiC File Share Portal",
+  "group": "Vendors Used Internally",
+  "groupOrder": 2,
+  "provider": "statuspage",
+  "url": "https://status.onehub.com",
+  "label": ":file_folder: *Onehub / CMiC File Share Status*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": false,
+  "includeMaintenance": false,
+  "components": [],
+  "website": {
+    "url": "https://portal.cmicshare.com/",
+    "name": "portal.cmicshare.com",
+    "expect": "Sign In",
+    "slowSeconds": 15,
+    "timeoutSeconds": 30,
+    "failAfter": 2,
+    "certWarnDays": 14
+  }
+}
