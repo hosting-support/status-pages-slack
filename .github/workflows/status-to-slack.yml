@@ -8,7 +8,7 @@ on:
       service:
         description: 'Which service to run'
         type: choice
-        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password]
+        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password, calendly]
         default: all
       test_post:
         description: 'Also post the latest incident update, to preview the format'
@@ -53,6 +53,7 @@ jobs:
           - { id: claude,     prefix: CLAUDE,  secret: SLACK_WEBHOOK_URL_CLAUDE }
           - { id: luciq,      prefix: LUCIQ,   secret: SLACK_WEBHOOK_URL_LUCIQ }
           - { id: 1password,  prefix: OP,      secret: SLACK_WEBHOOK_URL_1PASSWORD }
+          - { id: calendly,   prefix: CALENDLY, secret: SLACK_WEBHOOK_URL_CALENDLY }
     # A manual run for one service skips the other services' steps
     env:
       SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
