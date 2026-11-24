@@ -100,14 +100,18 @@ function Get-SlackAcks {
     $channels = @((Invoke-Slack 'users.conversations' 'types=public_channel,private_channel&exclude_archived=true&limit=200').channels)
     Write-Host "Slack: checking $($channels.Count) channels for $($AckEmoji -join '/') reactions"
     $posts = @()
+    $script:slackTexts = @()   # every message read, for the diagnostic lines below
+    $read = 0
     foreach ($c in $channels) {
         $cursor = ''
         for ($page = 0; $page -lt 5; $page++) {
             $r = Invoke-Slack 'conversations.history' "channel=$($c.id)&oldest=$oldest&limit=200&cursor=$([uri]::EscapeDataString($cursor))"
             foreach ($m in $r.messages) {
+                $read++
+                $text = (@(Get-Strings $m) -join "`n") -replace '&(apos|#39);', "'" -replace '&quot;', '"' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&amp;', '&'
+                $script:slackTexts += $text
                 $users = @($m.reactions | Where-Object { $_.name -in $AckEmoji } | ForEach-Object { $_.users })
                 if ($users) {
-                    $text = (@(Get-Strings $m) -join "`n") -replace '&(apos|#39);', "'" -replace '&quot;', '"' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&amp;', '&'
                     $posts += [pscustomobject]@{ text = $text; users = $users; channel = $c.id; ts = $m.ts; replies = [int]$m.reply_count }
                 }
             }
@@ -115,6 +119,8 @@ function Get-SlackAcks {
             if (-not $cursor) { break }
         }
     }
+    $reacted = @($r.messages | Where-Object { $_.reactions }).Count
+    Write-Host "Slack: read $read messages ($reacted of the newest page have any reaction), $($posts.Count) with a check mark"
     $posts
 }
 
@@ -129,6 +135,8 @@ if ($open -and $SlackToken) {
             $needle = if ($o.key -like 'ref:*') { $o.i.ref } elseif ($o.key -like 'url:*') { $o.i.url } else { $o.i.title }
             $matched = @($posts | Where-Object { $_.text.Contains($needle) })
             $users = @($matched | ForEach-Object { $_.users } | Select-Object -Unique)
+            $mentions = @($script:slackTexts | Where-Object { $_.Contains($needle) }).Count
+            Write-Host "Slack: $($o.s.name) '$($o.i.title)' ($needle): in $mentions posts, $($matched.Count) with a check mark"
             if (-not $users) { continue }
             # the comment: the newest thread reply on an acknowledged post, e.g. "not impacting us"
             $comment = $null
