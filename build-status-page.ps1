@@ -103,10 +103,15 @@ function Get-SlackAcks {
     $script:slackTexts = @()   # every message read, for the diagnostic lines below
     $read = 0
     foreach ($c in $channels) {
+        # Newest first, going back page by page until 30 days ago. (Don't pass "oldest": with only
+        # a start time Slack returns the OLDEST messages after it, so in a busy channel the
+        # recent posts never came back.)
         $cursor = ''
-        for ($page = 0; $page -lt 5; $page++) {
-            $r = Invoke-Slack 'conversations.history' "channel=$($c.id)&oldest=$oldest&limit=200&cursor=$([uri]::EscapeDataString($cursor))"
+        $done = $false
+        for ($page = 0; $page -lt 10 -and -not $done; $page++) {
+            $r = Invoke-Slack 'conversations.history' "channel=$($c.id)&limit=200&cursor=$([uri]::EscapeDataString($cursor))"
             foreach ($m in $r.messages) {
+                if ([double]$m.ts -lt $oldest) { $done = $true; break }
                 $read++
                 $text = (@(Get-Strings $m) -join "`n") -replace '&(apos|#39);', "'" -replace '&quot;', '"' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&amp;', '&'
                 $script:slackTexts += $text
@@ -119,8 +124,7 @@ function Get-SlackAcks {
             if (-not $cursor) { break }
         }
     }
-    $reacted = @($r.messages | Where-Object { $_.reactions }).Count
-    Write-Host "Slack: read $read messages ($reacted of the newest page have any reaction), $($posts.Count) with a check mark"
+    Write-Host "Slack: read $read messages from the last 30 days, $($posts.Count) with a check mark"
     $posts
 }
 
