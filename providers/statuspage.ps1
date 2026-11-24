@@ -1,5 +1,10 @@
-# Atlassian Statuspage sites (cloudflarestatus.com, smtp2gostatus.com, githubstatus.com ...).
+# Atlassian Statuspage sites (cloudflarestatus.com, smtp2gostatus.com, githubstatus.com ...), and
+# other status pages that offer the same API (calendlystatus.com).
 # Recognizable by https://<site>/api/v2/summary.json answering with JSON.
+#
+# Some of those (Calendly) leave out an incident's link and components, and give imported old
+# updates the import date as created_at, so the time shown on the page (display_at) is used
+# when there is one, and the link falls back to <site>/incidents/<id>.
 
 function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $base = $Config.url.TrimEnd('/')
@@ -36,10 +41,10 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         foreach ($u in $i.incident_updates) {
             [pscustomobject]@{
                 id         = $u.id
-                time       = $u.created_at
+                time       = $(if ($u.display_at) { $u.display_at } else { $u.created_at })
                 kind       = $i.kind
                 title      = $i.name
-                url        = $i.shortlink
+                url        = $(if ($i.shortlink) { $i.shortlink } else { "$base/incidents/$($i.id)" })
                 status     = (Get-Culture).TextInfo.ToTitleCase(($u.status -replace '_', ' '))
                 color      = $statusColor[[string]$u.status]
                 impact     = [string]$i.impact
