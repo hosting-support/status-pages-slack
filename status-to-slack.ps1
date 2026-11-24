@@ -136,12 +136,13 @@ function Format-Body($body) {
 
 # ---- load previous state ----
 $firstRun = -not (Test-Path $StateFile)
-$state = @{ indicator = $null; seen = @(); components = @{}; extra = $null }
+$state = @{ indicator = $null; seen = @(); components = @{}; extra = $null; website = $null }
 if (-not $firstRun) {
     $saved = Get-Content $StateFile -Raw | ConvertFrom-Json
     $state.indicator = $saved.indicator
     $state.seen      = @($saved.seen)
     $state.extra     = $saved.extra
+    $state.website   = $saved.website
     if ($saved.components) { $saved.components.PSObject.Properties | ForEach-Object { $state.components[$_.Name] = $_.Value } }
 }
 $seen = New-Object 'System.Collections.Generic.HashSet[string]'
@@ -162,6 +163,18 @@ if ($feed.vars) {
         $Label = ([string]$Label).Replace("{$k}", [string]$feed.vars[$k])
         $Config.url = ([string]$Config.url).Replace("{$k}", [string]$feed.vars[$k])
     }
+}
+
+# website: also open one public page directly (providers/website.ps1), e.g. CMiC's File Share
+# portal next to Onehub's status page. Its problems are added to the feed as incidents.
+$websiteState = $null
+if ($Config.website) {
+    . (Join-Path $PSScriptRoot 'providers/website.ps1')
+    $web = Get-WebsiteCheck $Config.website $state.website
+    $websiteState = $web.state
+    $feed.updates = @($feed.updates | Where-Object { $_ }) + @($web.updates)
+    if ($feed.overall) { $feed.overall.description = "$($feed.overall.description) $([char]0xB7) $($web.summary)" }
+    else { $feed.overall = @{ indicator = $(if ($web.up) { 'none' } else { 'major' }); description = $web.summary } }
 }
 
 function Test-Wanted($u) {
@@ -238,6 +251,7 @@ New-Item -ItemType Directory -Force -Path (Split-Path $StateFile) | Out-Null
     seen       = @($liveIds | Where-Object { $seen.Contains($_) })
     components = $watched
     extra      = $feed.extra
+    website    = $websiteState
 } | ConvertTo-Json -Depth 6 | Set-Content -Path $StateFile -Encoding UTF8
 
 # ---- snapshot for the status page: open incidents and the last few closed ones ----

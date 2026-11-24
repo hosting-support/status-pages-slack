@@ -21,6 +21,7 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Luciq | https://statuspage.luciq.ai | `services/luciq.json` | `SLACK_WEBHOOK_URL_LUCIQ` | `LUCIQ_` |
 | 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
 | Calendly | https://calendlystatus.com | `services/calendly.json` | `SLACK_WEBHOOK_URL_CALENDLY` | `CALENDLY_` |
+| Onehub (CMiC File Share), plus a direct check of portal.cmicshare.com | https://status.onehub.com | `services/onehub.json` | `SLACK_WEBHOOK_URL_ONEHUB` | `ONEHUB_` |
 
 ## Accounts: where this lives and who can change it
 
@@ -103,6 +104,27 @@ What `categories` matches, and what the impact levels mean, per service:
 | Slack | service (`Messaging`, `Login/SSO`, `Huddles`, `Notifications`, `Apps/Integrations/APIs` ...) | notice = none, incident = minor, outage = major |
 | Salesforce | service key or name: `coreService` / `Core service`, `Communities` / `Experience Cloud`, `liveAgent` / `Chat` ... (defaults to the services a support portal relies on; Data Cloud, Marketing Cloud and Agentforce are left out) | disruption or major severity = major, otherwise minor |
 | Dynatrace | container names: `Analyze-AWS-americas` (Process / Retain / Analyze / Automate, per cloud and region) and the global services, which all start with `Dynatrace` (`Dynatrace Support Portal`, `Dynatrace Hub` ...). Default: `*-AWS-americas` and `Dynatrace *` | degraded = minor, partial disruption = major, disruption or security event = critical |
+
+### Direct website check
+
+A service can also open one public web page itself, next to what its vendor's status page
+says: add `"website"` to its settings file. `services/onehub.json` does this for CMiC's File
+Share portal (`portal.cmicshare.com`, hosted by Onehub), so a problem with the portal shows
+even when Onehub reports all clear. Code: `providers/website.ps1`.
+
+It only loads the page anyone sees before signing in, with **no account or credentials**, so
+it tells you the portal is up and showing its sign-in page, not that signing in or
+downloading works. It reports, as incidents that can be acknowledged with ✅ like any other:
+
+- **down**: no answer, an error response, a page without the `expect` text (e.g. `Sign In`),
+  or slower than `slowSeconds`, for `failAfter` checks in a row (default 2, so one blip
+  doesn't post). One "Down" post, then one "Back up" post with how long it was down.
+- **certificate expiring**: `certWarnDays` (default 14) before the site's security
+  certificate runs out, until it's renewed.
+
+The tile's subtitle adds the result, e.g. "All Systems Operational · portal.cmicshare.com up
+(0.4 s)". The checks run from GitHub's servers, so a problem only inside CMiC's network
+won't show.
 
 ## Adding another status page
 
