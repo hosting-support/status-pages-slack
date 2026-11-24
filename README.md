@@ -20,6 +20,7 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Claude | https://status.claude.com | `services/claude.json` | `SLACK_WEBHOOK_URL_CLAUDE` | `CLAUDE_` |
 | Luciq | https://statuspage.luciq.ai | `services/luciq.json` | `SLACK_WEBHOOK_URL_LUCIQ` | `LUCIQ_` |
 | 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
+| Calendly | https://calendlystatus.com | `services/calendly.json` | `SLACK_WEBHOOK_URL_CALENDLY` | `CALENDLY_` |
 
 ## Accounts: where this lives and who can change it
 
