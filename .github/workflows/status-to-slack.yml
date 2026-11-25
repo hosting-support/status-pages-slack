@@ -8,7 +8,7 @@ on:
       service:
         description: 'Which service to run'
         type: choice
-        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password, calendly, onehub]
+        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password, calendly, onehub, docusign, openai, jitterbit]
         default: all
       test_post:
         description: 'Also post the latest incident update, to preview the format'
@@ -55,6 +55,9 @@ jobs:
           - { id: 1password,  prefix: OP,      secret: SLACK_WEBHOOK_URL_1PASSWORD }
           - { id: calendly,   prefix: CALENDLY, secret: SLACK_WEBHOOK_URL_CALENDLY }
           - { id: onehub,     prefix: ONEHUB,  secret: SLACK_WEBHOOK_URL_ONEHUB }
+          - { id: docusign,   prefix: DOCUSIGN, secret: SLACK_WEBHOOK_URL_DOCUSIGN }
+          - { id: openai,     prefix: OPENAI,  secret: SLACK_WEBHOOK_URL_OPENAI }
+          - { id: jitterbit,  prefix: JITTERBIT, secret: SLACK_WEBHOOK_URL_JITTERBIT }
     # A manual run for one service skips the other services' steps
     env:
       SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
@@ -86,6 +89,13 @@ jobs:
           SKIP_OVERALL_STATUS: ${{ vars[format('{0}_SKIP_OVERALL_STATUS', matrix.prefix)] }}
           SLACK_LABEL: ${{ vars[format('{0}_SLACK_LABEL', matrix.prefix)] }}
         run: |
+          # "slack": false in services/<id>.json: shown on the status page only, never posted,
+          # so no webhook secret is needed (and no warning about a missing one)
+          $pageOnly = (Get-Content "services/${{ matrix.id }}.json" -Raw | ConvertFrom-Json).slack -eq $false
+          if ($pageOnly) {
+            ./status-to-slack.ps1 -Service ${{ matrix.id }}
+            exit 0
+          }
           if (-not $env:SLACK_WEBHOOK_URL) {
             # still checked for the status page, just not posted to Slack
             Write-Host "::warning::No ${{ matrix.secret }} secret yet, so ${{ matrix.id }} isn't posted to Slack"
