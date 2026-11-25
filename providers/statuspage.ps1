@@ -18,6 +18,41 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $groupNames = @{}
     $summary.components | Where-Object group | ForEach-Object { $groupNames[$_.id] = $_.name }
 
+    # incidentio: true for pages hosted on incident.io (status.openai.com). Their Statuspage-style
+    # API leaves out which components an incident affects, so the categories filter has nothing
+    # to match. incident.io's own page data (<site>/proxy/<host>) lists them for ongoing incidents
+    # only, so the names are remembered (in the saved state) for when the incident is resolved.
+    $tags = @{}
+    $apiStatus = $null
+    if ($Config.incidentio) {
+        if ($Saved) { $Saved.PSObject.Properties | ForEach-Object { $tags[$_.Name] = @($_.Value) } }
+        try {
+            $proxy = (Get-Json "$base/proxy/$(([uri]$base).Host)").summary
+            $compName = @{}
+            foreach ($c in $proxy.components) { $compName[[string]$c.id] = [string]$c.name }
+            foreach ($oi in $proxy.ongoing_incidents) {
+                $names = @(@($oi.component_impacts) + @($oi.affected_components) | ForEach-Object { $compName[[string]$_.component_id] } |
+                           Where-Object { $_ } | Select-Object -Unique)
+                if ($names) { $tags[[string]$oi.id] = @(@($tags[[string]$oi.id]) + $names | Where-Object { $_ } | Select-Object -Unique) }
+            }
+            # the page's headline covers everything (ChatGPT, Codex ...); this one covers only the
+            # components the categories filter keeps
+            $watchedNow = @($proxy.affected_components | Where-Object { $n = $compName[[string]$_.component_id]
+                            $n -and (-not $Categories.Count -or ($Categories | Where-Object { $n -like $_ })) })
+            $apiStatus = if (-not $watchedNow) { @{ indicator = 'none'; description = "$(@($Categories) -join ', ') operational" } }
+                         else { @{ indicator = $(if ($watchedNow | Where-Object { $_.status -match 'full_outage|major' }) { 'major' } else { 'minor' })
+                                   description = "Affected: $(@($watchedNow | ForEach-Object { $compName[[string]$_.component_id] }) -join ', ')" } }
+        } catch { Write-Host "Couldn't read the incident.io page data ($($_.Exception.Message)); using the saved component names" }
+        # forget incidents that are no longer listed
+        $listed = @{}; foreach ($i in $items) { $listed[[string]$i.id] = $true }
+        foreach ($k in @($tags.Keys)) { if (-not $listed[$k]) { $tags.Remove($k) } }
+        foreach ($i in $items) {
+            if (-not @($i.components | Where-Object { $_ }).Count -and $tags[[string]$i.id]) {
+                $i | Add-Member -NotePropertyName components -NotePropertyValue @($tags[[string]$i.id] | ForEach-Object { [pscustomobject]@{ name = $_; group_id = $null } }) -Force
+            }
+        }
+    }
+
     # Color follows the update's status, so a thread reads red -> orange -> yellow -> green
     $statusColor = @{
         investigating = 'red'; identified = 'orange'; monitoring = 'yellow'; resolved = 'green'; postmortem = 'green'
@@ -63,8 +98,9 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     }
 
     @{
-        overall    = @{ indicator = $summary.status.indicator; description = $summary.status.description }
+        overall    = $(if ($apiStatus) { $apiStatus } else { @{ indicator = $summary.status.indicator; description = $summary.status.description } })
         updates    = $updates
         components = $components
+        extra      = $(if ($Config.incidentio) { $tags } else { $null })
     }
 }
