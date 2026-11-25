@@ -3,6 +3,7 @@
   "purpose": "CMiC File Share Portal",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
+  "slack": false,
   "provider": "statuspage",
   "url": "https://status.onehub.com",
   "label": ":file_folder: *Onehub / CMiC File Share Status*",

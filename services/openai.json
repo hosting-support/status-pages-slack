@@ -1,0 +1,16 @@
+{
+  "name": "OpenAI",
+  "purpose": "CMiC AI Features",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
+  "provider": "statuspage",
+  "url": "https://status.openai.com",
+  "label": ":robot_face: *OpenAI Status*",
+  "categories": ["Chat Completions", "Responses", "Files", "Agents"],
+  "minImpact": "none",
+  "skipUntagged": true,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "components": [],
+  "incidentio": true
+}

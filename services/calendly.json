@@ -3,6 +3,7 @@
   "purpose": "Meeting Scheduling",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
+  "slack": false,
   "provider": "statuspage",
   "url": "https://calendlystatus.com",
   "label": ":calendar: *Calendly Status*",

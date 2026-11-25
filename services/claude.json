@@ -3,6 +3,7 @@
   "purpose": "AI",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
+  "slack": false,
   "provider": "statuspage",
   "url": "https://status.claude.com",
   "label": ":robot_face: *Claude Status*",

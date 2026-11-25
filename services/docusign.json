@@ -1,0 +1,15 @@
+{
+  "name": "DocuSign",
+  "purpose": "E-Signature",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
+  "provider": "docusign",
+  "url": "https://health.docusign.com/status",
+  "label": ":writing_hand: *DocuSign Status*",
+  "categories": ["NA1", "NA2", "NA3", "NA4", "CA"],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "components": []
+}

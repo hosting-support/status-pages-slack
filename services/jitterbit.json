@@ -1,0 +1,17 @@
+{
+  "name": "Jitterbit",
+  "purpose": "Salesforce to Jira Sync",
+  "group": "Vendors Used Internally",
+  "groupOrder": 2,
+  "slack": false,
+  "provider": "statuspage",
+  "url": "https://jitterbit.statuspage.io",
+  "label": ":link: *Jitterbit Status*",
+  "categories": ["NA Harmony"],
+  "showGroups": true,
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "components": []
+}
