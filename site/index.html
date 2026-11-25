@@ -123,10 +123,28 @@
   .card details.more { margin-top: 8px; font-size: 13px; }
   .card details.more ul.incidents { margin-top: 8px; font-size: 15px; }
   .error { padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+  /* toolbar: search and "only issues", above the sections */
+  [hidden] { display: none !important; }
+  .toolbar { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .search {
+    flex: 1 1 260px; max-width: 420px; font: inherit; font-size: 15px; color: var(--text);
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+  }
+  .search:focus { outline: 2px solid color-mix(in srgb, var(--maintenance) 60%, transparent); outline-offset: 1px; }
+  .issues-only {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    font-size: 14px; font-weight: 600; padding: 7px 12px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line);
+  }
+  .issues-only input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+  .issues-only:has(input:checked) { border-color: var(--major); background: color-mix(in srgb, var(--major) 10%, var(--card)); }
+  .filter-note { font-size: 13px; color: var(--muted); }
+  .empty { padding: 18px 16px; border-radius: 14px; text-align: center; font-weight: 600;
+           background: color-mix(in srgb, var(--none) 10%, var(--card)); border: 1px solid var(--line); }
 
   /* ?embed=1 : no page header, no history, tighter cards (for dashboards / iframes) */
   body.embed main { padding: 8px; }
-  body.embed header, body.embed .card details.recent { display: none; }
+  body.embed header, body.embed .card details.recent, body.embed .toolbar { display: none; }
   body.embed .banner { padding: 8px 12px; margin-bottom: 8px; }
   body.embed .health { margin-bottom: 6px; font-size: 12px; }
   body.embed .sections { gap: 10px; }
@@ -145,6 +163,12 @@
   </header>
   <div id="health" class="health" hidden><span class="dot"></span><span id="health-text"></span></div>
   <div id="banner" class="banner" hidden><span class="dot"></span><span id="banner-text"></span></div>
+  <div class="toolbar">
+    <input id="search" class="search" type="search" placeholder="Search vendors (press /)" aria-label="Search vendors" autocomplete="off">
+    <label class="issues-only"><input id="issues-only" type="checkbox"> <span id="issues-label">Only show issues</span></label>
+    <span id="filter-note" class="filter-note"></span>
+  </div>
+  <div id="empty" class="empty" hidden></div>
   <div id="grid" class="sections"></div>
 </main>
 <script>
@@ -154,7 +178,7 @@
   if (params.get('theme') === 'light' || params.get('theme') === 'dark') document.documentElement.dataset.theme = params.get('theme');
 
   const MAX_OPEN = 3;          // open incidents shown on a tile before "Show N more"
-  const BANNER_SKIPS = ['CMiC Internal Checks'];   // sections the top banner leaves out
+  const BANNER_SKIPS = ['CMiC Internal Checks', 'Public Cloud APIs'];   // sections the top banner leaves out (it counts vendors)
   const expanded = new Set();  // tiles whose "Show N more" is open, kept across the minute refresh
   // collapsed sections, remembered in this browser (storage can be unavailable; then just this visit)
   const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem('collapsedSections') || '[]'); } catch { return []; } })());
@@ -222,7 +246,8 @@
 
     const sub = [];
     // the vendor's own headline; it can disagree with the badge, which follows the filters
-    if (s.overall && s.overall.description) sub.push(`Vendor page: ${s.overall.description}`);
+    // (CMiC's own checks have no vendor page; their headline is a note of their own)
+    if (s.overall && s.overall.description) sub.push(s.statusPage ? `Vendor page: ${s.overall.description}` : s.overall.description);
     sub.push(`checked ${ago(s.checkedAt)}`);
     c.append(el('div', { class: 'sub', textContent: sub.join(' · ') }));
 
@@ -306,7 +331,13 @@
     try {
       const data = await fetchStatus();
       const services = data.services || [];
-      const cards = services.map(s => ({ ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99 }));
+      const cards = services.map(s => {
+        const c = { ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99 };
+        // what the search box matches, and whether "Only show issues" keeps it
+        c.node.dataset.search = [s.name, s.purpose, c.group].filter(Boolean).join(' ').toLowerCase();
+        c.node.dataset.issue = c.level === 'none' ? '0' : '1';
+        return c;
+      });
       // sections in "groupOrder" order (from the settings files); worst first within each
       const order = {};
       for (const c of cards) order[c.group] = Math.min(order[c.group] ?? 99, c.order);
@@ -323,10 +354,15 @@
             el('h2', { class: 'section-title', textContent: g }),
             el('span', { class: 'section-summary', style: `--accent: ${accent(worst)}` }, el('span', { class: 'dot' }), summaryText)),
           el('div', { class: 'grid' }, ...list.map(c => c.node)));
+        sec.dataset.group = g;
         sec.open = !collapsed.has(g);
-        sec.addEventListener('toggle', () => { sec.open ? collapsed.delete(g) : collapsed.add(g); saveCollapsed(); });
+        // while searching or filtering, sections open on their own; that isn't remembered
+        sec.addEventListener('toggle', () => { if (filtering()) return; sec.open ? collapsed.delete(g) : collapsed.add(g); saveCollapsed(); });
         return sec;
       }));
+      const issueCount = cards.filter(c => c.level !== 'none').length;
+      document.getElementById('issues-label').textContent = `Only show issues (${issueCount})`;
+      applyFilters();
 
       // the banner sums up the vendors only; CMiC's own checks have their own section
       const vendors = cards.filter(c => !BANNER_SKIPS.includes(c.group));
@@ -344,6 +380,47 @@
       document.getElementById('grid').replaceChildren(el('div', { class: 'error', textContent: `Couldn't load status: ${e.message}` }));
     }
   }
+  // ---- search and "Only show issues" ----
+  // Both work on the cards already on the page, and run again after every refresh. "Only show
+  // issues" is remembered in this browser; ?issues=1 in the address turns it on too.
+  const searchBox = document.getElementById('search');
+  const issuesBox = document.getElementById('issues-only');
+  try { issuesBox.checked = params.get('issues') === '1' || localStorage.getItem('issuesOnly') === '1'; } catch { issuesBox.checked = params.get('issues') === '1'; }
+  const filtering = () => !!(searchBox.value.trim() || issuesBox.checked);
+
+  function applyFilters() {
+    const q = searchBox.value.trim().toLowerCase();
+    const issuesOnly = issuesBox.checked;
+    let shown = 0, total = 0;
+    for (const sec of document.querySelectorAll('#grid .section')) {
+      let n = 0;
+      for (const c of sec.querySelectorAll('.card')) {
+        const ok = (!q || c.dataset.search.includes(q)) && (!issuesOnly || c.dataset.issue === '1');
+        c.hidden = !ok;
+        total++; if (ok) n++;
+      }
+      shown += n;
+      sec.hidden = filtering() && n === 0;
+      // open sections with matches while filtering; otherwise back to how the viewer left them
+      sec.open = filtering() ? (n > 0 || sec.open) : !collapsed.has(sec.dataset.group);
+    }
+    const empty = document.getElementById('empty');
+    empty.hidden = !filtering() || shown > 0;
+    empty.textContent = q ? `No vendor matches "${searchBox.value.trim()}"${issuesOnly ? ' among those with issues' : ''}.`
+                          : 'No issues: every service is operational.';
+    document.getElementById('filter-note').textContent = filtering() && shown ? `Showing ${shown} of ${total}` : '';
+  }
+  searchBox.addEventListener('input', applyFilters);
+  issuesBox.addEventListener('change', () => {
+    try { localStorage.setItem('issuesOnly', issuesBox.checked ? '1' : '0'); } catch {}
+    applyFilters();
+  });
+  // "/" jumps to the search box; Esc clears it
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchBox) { e.preventDefault(); searchBox.focus(); }
+    else if (e.key === 'Escape' && document.activeElement === searchBox) { searchBox.value = ''; applyFilters(); }
+  });
+
   load();
   setInterval(load, 60000);
 })();
