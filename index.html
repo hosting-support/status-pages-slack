@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMiC Vendors Status</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5d6675; --line: #e3e6ec;
+    --none: #2eb67d; --minor: #d9a21b; --major: #e8711c; --critical: #e01e5a; --maintenance: #1d9bd1; --stale: #9aa1ad;
+  }
+  /* --accent is set per banner / card; --tint is a light wash of it */
+  .banner, .card { --tint: color-mix(in srgb, var(--accent) 12%, var(--card)); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --card: #1b1f27; --text: #e7e9ee; --muted: #9aa3b2; --line: #2a303b;
+      --minor: #ecb22e; --major: #f38020;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151b; --card: #1b1f27; --text: #e7e9ee; --muted: #9aa3b2; --line: #2a303b;
+    --minor: #ecb22e; --major: #f38020;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1440px; margin: 0 auto; padding: 24px 16px 32px; }
+  a { color: inherit; }
+  header { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 16px; text-align: center; }
+  h1 { font-size: 26px; margin: 0; }
+  .meta { color: var(--muted); font-size: 13px; }
+
+  .banner {
+    --accent: var(--none);
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px; margin-bottom: 16px;
+    background: var(--tint); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+    border-radius: 10px; font-weight: 600;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  /* update health: is the scheduler still feeding this page? */
+  .health {
+    --accent: var(--none);
+    display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-bottom: 10px;
+    font-size: 13px; color: var(--muted);
+  }
+  .health .dot { width: 9px; height: 9px; }
+  .health strong { color: var(--text); font-weight: 600; }
+
+  /* one section per group, each collapsible. Tiles in a row share that row's height (the grid
+     default), so one busy tile doesn't stretch every tile on the page */
+  .sections { display: grid; gap: 24px; }
+  /* each section is framed, with its title a step below the page title */
+  .section {
+    background: color-mix(in srgb, var(--text) 3%, var(--bg));
+    border: 2px solid color-mix(in srgb, var(--text) 22%, var(--bg)); border-radius: 14px; padding: 12px 16px;
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--text) 10%, transparent);
+  }
+  /* click the title to collapse a section; the choice is remembered in this browser */
+  .section > summary {
+    list-style: none; cursor: pointer; user-select: none;
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .section > summary::-webkit-details-marker { display: none; }
+  .section-title { font-size: 20px; font-weight: 700; margin: 0; text-align: center; }
+  .chevron { font-size: 14px; color: var(--muted); transition: transform .15s; }
+  .section[open] > summary .chevron { transform: rotate(90deg); }
+  .section-summary { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .section-summary .dot { width: 9px; height: 9px; }
+  .section[open] > summary .section-summary { display: none; }
+  .section[open] > .grid { margin-top: 12px; }
+  .section > summary:hover .section-title { text-decoration: underline; text-underline-offset: 4px; }
+  /* 4 tiles per row on a wide screen, fewer as it narrows */
+  .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 1300px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 800px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px)  { .grid { grid-template-columns: 1fr; } }
+  .card {
+    --accent: var(--none);
+    display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: 10px; padding: 12px 14px; min-width: 0;
+  }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  /* the name (and purpose) takes the room left of the badge */
+  .card-head h2 { font-size: 16px; margin: 0; flex: 1 1 0; min-width: 0; }
+  /* what we use the vendor for: its own full-width line under the name and badge, kept to one
+     line (cut with "..." only if a card is very narrow; the full text shows on hover) */
+  .purpose {
+    font-size: 16px; font-weight: 500; color: var(--muted); margin: 2px 0 8px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-head h2 a { text-decoration: none; }
+  .card-head h2 a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: var(--tint); color: var(--text);
+  }
+  .badge .dot { width: 8px; height: 8px; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  ul.incidents { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  ul.incidents li { border-top: 1px solid var(--line); padding-top: 8px; overflow-wrap: anywhere; }
+  .inc-title { font-weight: 600; }
+  .inc-meta { color: var(--muted); font-size: 13px; }
+  .quiet { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  /* acknowledged incident: dimmed, with who/when/comment in a green box */
+  ul.incidents li.acked .inc-title, ul.incidents li.acked .inc-meta { opacity: .7; }
+  .ack {
+    margin-top: 6px; padding: 6px 10px; border-radius: 6px; font-size: 13px;
+    background: color-mix(in srgb, var(--none) 12%, transparent); border-left: 3px solid var(--none);
+  }
+  .ack-head { font-weight: 600; }
+  .ack-note { margin-top: 2px; font-style: italic; white-space: pre-line; }
+  /* margin-top: auto keeps "Recent incidents" at the bottom of every tile */
+  .card details.recent { margin-top: auto; padding-top: 10px; font-size: 13px; }
+  .card details summary { cursor: pointer; color: var(--muted); }
+  .card details.recent ul { margin: 6px 0 0; padding-left: 18px; }
+  .card details.recent li { margin: 4px 0; overflow-wrap: anywhere; }
+  /* open incidents past the first few fold away, so one busy tile doesn't stretch every tile */
+  .card details.more { margin-top: 8px; font-size: 13px; }
+  .card details.more ul.incidents { margin-top: 8px; font-size: 15px; }
+  .error { padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+  /* toolbar: search and "only issues", above the sections */
+  [hidden] { display: none !important; }
+  .toolbar { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .search {
+    flex: 1 1 260px; max-width: 420px; font: inherit; font-size: 15px; color: var(--text);
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+  }
+  .search:focus { outline: 2px solid color-mix(in srgb, var(--maintenance) 60%, transparent); outline-offset: 1px; }
+  .issues-only {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    font-size: 14px; font-weight: 600; padding: 7px 12px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--line);
+  }
+  .issues-only input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+  .issues-only:has(input:checked) { border-color: var(--major); background: color-mix(in srgb, var(--major) 10%, var(--card)); }
+  .filter-note { font-size: 13px; color: var(--muted); }
+  .empty { padding: 18px 16px; border-radius: 14px; text-align: center; font-weight: 600;
+           background: color-mix(in srgb, var(--none) 10%, var(--card)); border: 1px solid var(--line); }
+
+  /* ?embed=1 : no page header, no history, tighter cards (for dashboards / iframes) */
+  body.embed main { padding: 8px; }
+  body.embed header, body.embed .card details.recent, body.embed .toolbar { display: none; }
+  body.embed .banner { padding: 8px 12px; margin-bottom: 8px; }
+  body.embed .health { margin-bottom: 6px; font-size: 12px; }
+  body.embed .sections { gap: 10px; }
+  body.embed .section { padding: 8px 10px 10px; border-radius: 10px; }
+  body.embed .section-title { font-size: 14px; }
+  body.embed .section[open] > .grid { margin-top: 6px; }
+  body.embed .grid { gap: 8px; }
+  body.embed .card { padding: 10px 12px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>CMiC Vendors Status</h1>
+    <span class="meta">Refreshes every minute</span>
+  </header>
+  <div id="health" class="health" hidden><span class="dot"></span><span id="health-text"></span></div>
+  <div id="banner" class="banner" hidden><span class="dot"></span><span id="banner-text"></span></div>
+  <div class="toolbar">
+    <input id="search" class="search" type="search" placeholder="Search vendors (press /)" aria-label="Search vendors" autocomplete="off">
+    <label class="issues-only"><input id="issues-only" type="checkbox"> <span id="issues-label">Only show issues</span></label>
+    <span id="filter-note" class="filter-note"></span>
+  </div>
+  <div id="empty" class="empty" hidden></div>
+  <div id="grid" class="sections"></div>
+</main>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  if (params.has('embed')) document.body.classList.add('embed');
+  if (params.get('theme') === 'light' || params.get('theme') === 'dark') document.documentElement.dataset.theme = params.get('theme');
+
+  const MAX_OPEN = 3;          // open incidents shown on a tile before "Show N more"
+  const BANNER_SKIPS = ['CMiC Internal Checks', 'Public Cloud APIs'];   // sections the top banner leaves out (it counts vendors)
+  const expanded = new Set();  // tiles whose "Show N more" is open, kept across the minute refresh
+  // collapsed sections, remembered in this browser (storage can be unavailable; then just this visit)
+  const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem('collapsedSections') || '[]'); } catch { return []; } })());
+  const saveCollapsed = () => { try { localStorage.setItem('collapsedSections', JSON.stringify([...collapsed])); } catch {} };
+  const STALE_MINUTES = 20;   // the workflow runs every 5 min; older than this means it stopped
+  const LEVELS = {
+    none:        { label: 'Operational',  rank: 0 },
+    maintenance: { label: 'Maintenance',  rank: 1 },
+    minor:       { label: 'Minor issue',  rank: 2 },
+    major:       { label: 'Major issue',  rank: 3 },
+    critical:    { label: 'Critical',     rank: 4 },
+    stale:       { label: 'No recent data', rank: 1 },
+  };
+
+  const el = (tag, props = {}, ...children) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') n.className = v; else if (k === 'style') n.style.cssText = v; else n[k] = v;
+    }
+    for (const c of children) if (c != null) n.append(c);
+    return n;
+  };
+  // only http(s) links from the data
+  const safeUrl = (u) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
+  const link = (text, url) => { const u = safeUrl(url); return u ? el('a', { href: u, target: '_blank', rel: 'noopener', textContent: text }) : el('span', { textContent: text }); };
+  const ago = (iso) => {
+    const m = Math.round((Date.now() - new Date(iso)) / 60000);
+    if (!isFinite(m)) return '';
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60); if (h < 48) return `${h} h ago`;
+    return `${Math.round(h / 24)} days ago`;
+  };
+  // local date and time, plus how long ago: "Nov 9, 9:42 AM (3 h ago)"
+  const when = (iso) => {
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return `${d.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} (${ago(iso)})`;
+  };
+  const accent = (level) =>`var(--${level === 'stale' ? 'stale' : level})`;
+
+  function incidentItem(i) {
+    const affects = (i.affects || []).slice(0, 4).join(', ') + ((i.affects || []).length > 4 ? ` +${i.affects.length - 4} more` : '');
+    const meta = [i.status, i.impactText && `impact: ${i.impactText}`, affects, ago(i.updated)].filter(Boolean).join(' · ');
+    const li = el('li', {}, el('div', { class: 'inc-title' }, link(i.title, i.url)), el('div', { class: 'inc-meta', textContent: meta }));
+    // acknowledged with a check-mark reaction in Slack: doesn't count toward the tile's status
+    if (i.ack) {
+      const by = (i.ack.by || []).join(', ');
+      li.classList.add('acked');
+      li.append(el('div', { class: 'ack' },
+        el('div', { class: 'ack-head', textContent: `✓ Acknowledged${by ? ` by ${by}` : ''}${i.ack.since ? ` · ${when(i.ack.since)}` : ''}` }),
+        i.ack.comment ? el('div', { class: 'ack-note', textContent: i.ack.comment }) : null));
+    }
+    return li;
+  }
+
+  function card(s) {
+    const stale = (Date.now() - new Date(s.checkedAt)) / 60000 > STALE_MINUTES;
+    const level = stale ? 'stale' : (LEVELS[s.level] ? s.level : 'none');
+    const c = el('section', { class: 'card', style: `--accent: ${accent(level)}` });
+    c.append(el('div', { class: 'card-head' },
+      el('h2', {}, link(s.name, s.statusPage)),
+      el('span', { class: 'badge' }, el('span', { class: 'dot' }), LEVELS[level].label)));
+    if (s.purpose) c.append(el('div', { class: 'purpose', textContent: s.purpose, title: s.purpose }));
+
+    const sub = [];
+    // the vendor's own headline; it can disagree with the badge, which follows the filters
+    // (CMiC's own checks have no vendor page; their headline is a note of their own)
+    if (s.overall && s.overall.description) sub.push(s.statusPage ? `Vendor page: ${s.overall.description}` : s.overall.description);
+    sub.push(`checked ${ago(s.checkedAt)}`);
+    c.append(el('div', { class: 'sub', textContent: sub.join(' · ') }));
+
+    const open = s.open || [];
+    if (open.length) {
+      c.append(el('ul', { class: 'incidents' }, ...open.slice(0, MAX_OPEN).map(incidentItem)));
+      if (open.length > MAX_OPEN) {
+        const more = el('details', { class: 'more' },
+          el('summary', { textContent: `Show ${open.length - MAX_OPEN} more open` }),
+          el('ul', { class: 'incidents' }, ...open.slice(MAX_OPEN).map(incidentItem)));
+        if (expanded.has(s.id)) more.open = true;
+        more.addEventListener('toggle', () => { more.open ? expanded.add(s.id) : expanded.delete(s.id); });
+        c.append(more);
+      }
+    } else {
+      const last = (s.recent || [])[0];
+      c.append(el('div', { class: 'quiet' },
+        'No open incidents', last ? el('span', {}, ' · last: ', link(last.title, last.url), ` (${ago(last.updated)})`) : null));
+    }
+    if ((s.recent || []).length) {
+      c.append(el('details', { class: 'recent' }, el('summary', { textContent: `Recent incidents (${s.recent.length})` }),
+        el('ul', {}, ...s.recent.map(r => el('li', {}, link(r.title, r.url), ` · ${r.status} · ${ago(r.updated)}`)))));
+    }
+    return { node: c, level };
+  }
+
+  // The Cloudflare scheduler starts a run every 5 min; GitHub's hourly schedule is only a backup.
+  // So the health follows the scheduler's last run, not just the page's last update.
+  const minutesSince = (iso) => (Date.now() - new Date(iso)) / 60000;
+  function showHealth(data) {
+    const run = data.run || {};
+    const schedulerAt = run.lastSchedulerAt || data.generatedAt;
+    const age = minutesSince(schedulerAt);
+    let level, head, detail;
+    if (age <= 12) {
+      level = 'none'; head = 'Updates running';
+      detail = `every 5 min via the Cloudflare scheduler · last run ${ago(schedulerAt)}`;
+    } else if (age <= STALE_MINUTES) {
+      level = 'minor'; head = 'Updates delayed';
+      detail = `last scheduler run ${ago(schedulerAt)}`;
+    } else {
+      level = 'critical'; head = 'Updates stopped';
+      detail = `no Cloudflare scheduler run for ${ago(schedulerAt).replace(' ago', '')}`;
+    }
+    // GitHub's backup ran more recently than the scheduler: the data is fresher than the scheduler
+    if (run.trigger === 'schedule' && minutesSince(data.generatedAt) < age - 1) {
+      detail += ` · GitHub backup schedule ran ${ago(data.generatedAt)}`;
+    }
+    const box = document.getElementById('health');
+    box.style.setProperty('--accent', accent(level));
+    const text = document.getElementById('health-text');
+    text.replaceChildren(el('strong', { textContent: head }), ` · ${detail}`);
+    if (safeUrl(run.url)) text.append(' · ', link('run log', run.url));
+    box.hidden = false;
+  }
+
+  // On GitHub Pages (<owner>.github.io/<repo>/) the data comes from the repo's "status-data"
+  // branch, which every run updates; the site itself is only redeployed when the page changes.
+  // The status.json next to the page is the fallback (and what a local copy uses).
+  function dataUrls() {
+    const urls = [];
+    const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+    const repo = location.pathname.split('/').filter(Boolean)[0];
+    if (m && repo) urls.push(`https://raw.githubusercontent.com/${m[1]}/${repo}/status-data/status.json`);
+    urls.push('status.json');
+    return urls;
+  }
+  async function fetchStatus() {
+    let lastError;
+    for (const url of dataUrls()) {
+      try {
+        const res = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
+        if (res.ok) return await res.json();
+        lastError = new Error(`${url}: HTTP ${res.status}`);
+      } catch (e) { lastError = e; }
+    }
+    throw lastError;
+  }
+
+  async function load() {
+    try {
+      const data = await fetchStatus();
+      const services = data.services || [];
+      const cards = services.map(s => {
+        const c = { ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99 };
+        // what the search box matches, and whether "Only show issues" keeps it
+        c.node.dataset.search = [s.name, s.purpose, c.group].filter(Boolean).join(' ').toLowerCase();
+        c.node.dataset.issue = c.level === 'none' ? '0' : '1';
+        return c;
+      });
+      // sections in "groupOrder" order (from the settings files); worst first within each
+      const order = {};
+      for (const c of cards) order[c.group] = Math.min(order[c.group] ?? 99, c.order);
+      const groups = Object.keys(order).sort((a, b) => order[a] - order[b] || a.localeCompare(b));
+      document.getElementById('grid').replaceChildren(...groups.map(g => {
+        const list = cards.filter(c => c.group === g).sort((a, b) => LEVELS[b.level].rank - LEVELS[a.level].rank);
+        // shown while collapsed, so a folded section still says whether anything is wrong
+        const bad = list.filter(c => c.level !== 'none' && c.level !== 'stale');
+        const worst = bad.length ? bad[0].level : (list.some(c => c.level === 'stale') ? 'stale' : 'none');
+        const summaryText = bad.length ? `${bad.length} of ${list.length} reporting issues` : `${list.length} services, all operational`;
+        const sec = el('details', { class: 'section' },
+          el('summary', {},
+            el('span', { class: 'chevron', textContent: '▶', ariaHidden: 'true' }),
+            el('h2', { class: 'section-title', textContent: g }),
+            el('span', { class: 'section-summary', style: `--accent: ${accent(worst)}` }, el('span', { class: 'dot' }), summaryText)),
+          el('div', { class: 'grid' }, ...list.map(c => c.node)));
+        sec.dataset.group = g;
+        sec.open = !collapsed.has(g);
+        // while searching or filtering, sections open on their own; that isn't remembered
+        sec.addEventListener('toggle', () => { if (filtering()) return; sec.open ? collapsed.delete(g) : collapsed.add(g); saveCollapsed(); });
+        return sec;
+      }));
+      const issueCount = cards.filter(c => c.level !== 'none').length;
+      document.getElementById('issues-label').textContent = `Only show issues (${issueCount})`;
+      applyFilters();
+
+      // the banner sums up the vendors only; CMiC's own checks have their own section
+      const vendors = cards.filter(c => !BANNER_SKIPS.includes(c.group));
+      const issues = vendors.filter(c => c.level !== 'none' && c.level !== 'stale');
+      const stale = vendors.filter(c => c.level === 'stale');
+      const worst = vendors.reduce((w, c) => LEVELS[c.level].rank > LEVELS[w].rank && c.level !== 'stale' ? c.level : w, 'none');
+      const banner = document.getElementById('banner');
+      banner.style.setProperty('--accent', accent(issues.length ? worst : (stale.length ? 'stale' : 'none')));
+      let text = issues.length ? `${issues.length} of ${vendors.length} vendors reporting issues` : `All ${vendors.length} vendors operational`;
+      if (stale.length) text += ` · ${stale.length} not checked recently`;
+      document.getElementById('banner-text').textContent = text;
+      banner.hidden = false;
+      showHealth(data);
+    } catch (e) {
+      document.getElementById('grid').replaceChildren(el('div', { class: 'error', textContent: `Couldn't load status: ${e.message}` }));
+    }
+  }
+  // ---- search and "Only show issues" ----
+  // Both work on the cards already on the page, and run again after every refresh. "Only show
+  // issues" is remembered in this browser; ?issues=1 in the address turns it on too.
+  const searchBox = document.getElementById('search');
+  const issuesBox = document.getElementById('issues-only');
+  try { issuesBox.checked = params.get('issues') === '1' || localStorage.getItem('issuesOnly') === '1'; } catch { issuesBox.checked = params.get('issues') === '1'; }
+  const filtering = () => !!(searchBox.value.trim() || issuesBox.checked);
+
+  function applyFilters() {
+    const q = searchBox.value.trim().toLowerCase();
+    const issuesOnly = issuesBox.checked;
+    let shown = 0, total = 0;
+    for (const sec of document.querySelectorAll('#grid .section')) {
+      let n = 0;
+      for (const c of sec.querySelectorAll('.card')) {
+        const ok = (!q || c.dataset.search.includes(q)) && (!issuesOnly || c.dataset.issue === '1');
+        c.hidden = !ok;
+        total++; if (ok) n++;
+      }
+      shown += n;
+      sec.hidden = filtering() && n === 0;
+      // open sections with matches while filtering; otherwise back to how the viewer left them
+      sec.open = filtering() ? (n > 0 || sec.open) : !collapsed.has(sec.dataset.group);
+    }
+    const empty = document.getElementById('empty');
+    empty.hidden = !filtering() || shown > 0;
+    empty.textContent = q ? `No vendor matches "${searchBox.value.trim()}"${issuesOnly ? ' among those with issues' : ''}.`
+                          : 'No issues: every service is operational.';
+    document.getElementById('filter-note').textContent = filtering() && shown ? `Showing ${shown} of ${total}` : '';
+  }
+  searchBox.addEventListener('input', applyFilters);
+  issuesBox.addEventListener('change', () => {
+    try { localStorage.setItem('issuesOnly', issuesBox.checked ? '1' : '0'); } catch {}
+    applyFilters();
+  });
+  // "/" jumps to the search box; Esc clears it
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchBox) { e.preventDefault(); searchBox.focus(); }
+    else if (e.key === 'Escape' && document.activeElement === searchBox) { searchBox.value = ''; applyFilters(); }
+  });
+
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+</body>
+</html>
