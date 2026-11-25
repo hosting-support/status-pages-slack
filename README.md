@@ -16,7 +16,7 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | Salesforce (instance looked up from `cmicglobal`, now CAN36) | https://status.salesforce.com/instances/CAN36 | `services/salesforce.json` | `SLACK_WEBHOOK_URL_SALESFORCE` | `SF_` |
 | Dynatrace | https://dynatrace.status.io | `services/dynatrace.json` | `SLACK_WEBHOOK_URL_DYNATRACE` | `DT_` |
 | Jira | https://jira-software.status.atlassian.com | `services/jira.json` | `SLACK_WEBHOOK_URL_JIRA` | `JIRA_` |
-| Microsoft (Microsoft 365 + Azure) | https://status.cloud.microsoft | `services/microsoft.json` | `SLACK_WEBHOOK_URL_MICROSOFT` | `MS_` |
+| Microsoft (Microsoft 365, Azure, and consumer Copilot as an early warning for Microsoft 365 Copilot) | https://status.cloud.microsoft | `services/microsoft.json` | `SLACK_WEBHOOK_URL_MICROSOFT` | `MS_` |
 | Claude | https://status.claude.com | `services/claude.json` | `SLACK_WEBHOOK_URL_CLAUDE` | `CLAUDE_` |
 | Luciq | https://statuspage.luciq.ai | `services/luciq.json` | `SLACK_WEBHOOK_URL_LUCIQ` | `LUCIQ_` |
 | 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
