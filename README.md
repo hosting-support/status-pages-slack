@@ -22,6 +22,9 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | 1Password (USA/Global region, cmicglobal.1password.com) | https://status.1password.com | `services/1password.json` | `SLACK_WEBHOOK_URL_1PASSWORD` | `OP_` |
 | Calendly | https://calendlystatus.com | `services/calendly.json` | `SLACK_WEBHOOK_URL_CALENDLY` | `CALENDLY_` |
 | Onehub (CMiC File Share), plus a direct check of portal.cmicshare.com | https://status.onehub.com | `services/onehub.json` | `SLACK_WEBHOOK_URL_ONEHUB` | `ONEHUB_` |
+| DocuSign (North America accounts) | https://docusign.statuspage.io | `services/docusign.json` | `SLACK_WEBHOOK_URL_DOCUSIGN` | `DOCUSIGN_` |
+| OpenAI (API only, not ChatGPT or Codex) | https://status.openai.com | `services/openai.json` | `SLACK_WEBHOOK_URL_OPENAI` | `OPENAI_` |
+| Jitterbit (NA Harmony, the Salesforce to Jira sync) | https://jitterbit.statuspage.io | `services/jitterbit.json` | `SLACK_WEBHOOK_URL_JITTERBIT` | `JITTERBIT_` |
 
 ## Accounts: where this lives and who can change it
 
@@ -87,6 +90,7 @@ Each service's defaults are in its `services/<id>.json`:
 | `includeMaintenance` | `true` | Also post scheduled maintenance (Statuspage sites, Slack and Salesforce). |
 | `components` | `["Dashboard", "*Workers*"]` | Also post when one of these components changes status (Statuspage sites). |
 | `label` | `":cloud: *Cloudflare Status*"` | Small header on every post. |
+| `slack` | `false` | **Page only**: checked and shown on the status page as usual, never posted to Slack, and no webhook secret needed. Its incidents can't be acknowledged with ✅, since there's no post to react to. Today: Calendly, 1Password, Claude, Onehub, Slack, Jitterbit. |
 
 Any of the first four, and the label, can also be overridden without editing files: under
 **Settings → Secrets and variables → Actions → Variables**, add `<prefix>CATEGORIES`,
@@ -104,6 +108,19 @@ What `categories` matches, and what the impact levels mean, per service:
 | Slack | service (`Messaging`, `Login/SSO`, `Huddles`, `Notifications`, `Apps/Integrations/APIs` ...) | notice = none, incident = minor, outage = major |
 | Salesforce | service key or name: `coreService` / `Core service`, `Communities` / `Experience Cloud`, `liveAgent` / `Chat` ... (defaults to the services a support portal relies on; Data Cloud, Marketing Cloud and Agentforce are left out) | disruption or major severity = major, otherwise minor |
 | Dynatrace | container names: `Analyze-AWS-americas` (Process / Retain / Analyze / Automate, per cloud and region) and the global services, which all start with `Dynatrace` (`Dynatrace Support Portal`, `Dynatrace Hub` ...). Default: `*-AWS-americas` and `Dynatrace *` | degraded = minor, partial disruption = major, disruption or security event = critical |
+
+### DocuSign and OpenAI
+
+- **DocuSign** (`providers/docusign.ps1`): the old `docusign.statuspage.io` page is abandoned, so
+  this reads the data behind DocuSign's status center (health.docusign.com). Categories match
+  site names; the default is the eSignature production sites `NA1`-`NA4` and `CA`, which CMiC
+  customers' accounts are on (`DEMO` is the developer sandbox).
+- **OpenAI** (`"incidentio": true` in `services/openai.json`): status.openai.com runs on
+  incident.io, whose Statuspage-style API doesn't say which components an incident affects.
+  The Statuspage reader then also reads incident.io's own page data for the components of
+  ongoing incidents and remembers them until the incident is resolved. Categories are the APIs
+  CMiC's AI features call (Chat Completions, Responses, Files, Agents), so ChatGPT and Codex
+  incidents don't count; `skipUntagged` is on for the same reason.
 
 ### Direct website check
 
@@ -152,7 +169,11 @@ shows `"purpose"` after the vendor's name (e.g. "AWS - SaaS (Public Cloud Enviro
 incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
 every minute. A service whose data is over 20 minutes old shows as "No recent data".
 
-- `?embed=1` hides the page header and history, for dashboards or iframes.
+- **Search box and "Only show issues"** above the sections. The search matches a vendor's
+  name, its label (e.g. "E-Signature") and its section; press `/` to jump to it and Esc to
+  clear it. "Only show issues" hides every operational tile and is remembered in that
+  browser. `?issues=1` in the address turns it on too.
+- `?embed=1` hides the page header, toolbar and history, for dashboards or iframes.
 - `?theme=dark` or `?theme=light` forces a theme (default follows the viewer's system).
 - The data behind it is `status.json` on the `status-data` branch
   (`https://raw.githubusercontent.com/<your-user>/<repo>/status-data/status.json`), if another

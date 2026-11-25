@@ -84,7 +84,12 @@ $Components = @($Config.components | Where-Object { $_ })   # wildcard component
 
 $impactRank = @{ none = 0; minor = 1; major = 2; critical = 3 }
 if (-not $impactRank.ContainsKey($MinImpact)) { throw "minImpact must be none, minor, major or critical (got '$MinImpact')" }
-if (-not $DryRun -and -not $WebhookUrl) {
+# "slack": false in the settings file: page only. The service is checked and shown on the status
+# page as usual, but nothing is posted to Slack and no webhook is needed. Changes still count as
+# posted, so nothing floods in if it's switched back on later.
+$PageOnly = [string](Get-Setting 'slack' '-' $true) -eq 'false'
+if ($PageOnly) { $Mute = [switch]$true }
+if (-not $DryRun -and -not $PageOnly -and -not $WebhookUrl) {
     throw 'No Slack webhook. Pass -WebhookUrl or set SLACK_WEBHOOK_URL (or use -DryRun).'
 }
 
@@ -239,7 +244,7 @@ if ($Components.Count -and $feed.components) {
 
 # ---- send + save ----
 # muted: the changes still count as posted, so nothing floods in when alerts resume
-if ($Mute) { if ($messages.Count) { Write-Host "Alerts paused: $($messages.Count) message(s) not posted" } }
+if ($Mute) { if ($messages.Count) { Write-Host "$(if ($PageOnly) { 'Page only ("slack": false)' } else { 'Alerts paused' }): $($messages.Count) message(s) not posted" } }
 else       { foreach ($m in $messages) { Send-Slack $m.text $m.color } }
 
 # keep only ids still present in the feed so the state file doesn't grow forever
