@@ -1,6 +1,8 @@
 {
   "name": "Calendly",
   "purpose": "Meeting Scheduling",
+  "about": "Watches Calendly's status page; an outage stops customers booking meetings through Calendly.",
+  "details": "Reads Calendly's status page (all components, including its calendar connections and integrations). During an outage, customers may not be able to book, change or see meetings scheduled through Calendly, and new bookings may not reach calendars.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

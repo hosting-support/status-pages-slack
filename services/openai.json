@@ -1,6 +1,8 @@
 {
   "name": "OpenAI",
   "purpose": "CMiC AI Features",
+  "about": "Watches the OpenAI API services CMiC's AI features call; an outage makes CMiC AI features fail for customers using OpenAI.",
+  "details": "Reads status.openai.com and keeps only incidents on the APIs CMiC's AI features call (such as Chat Completions, Responses and Files); ChatGPT-only incidents are ignored. During an incident, CMiC AI features can return errors or time out. Customers set up with Azure OpenAI instead are covered by the Microsoft tile.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Integrations into CMiC",

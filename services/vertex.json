@@ -1,6 +1,8 @@
 {
   "name": "Vertex",
   "purpose": "Payroll Tax Calculation",
+  "about": "Watches Vertex's payroll tax services; an outage stops payroll tax calculation in CMiC payroll.",
+  "details": "Reads Vertex's status page and keeps only the payroll tax services (not Vertex's sales tax and e-invoicing products). CMiC payroll calls Vertex to calculate payroll taxes, so during an incident payroll runs that need tax calculation can fail or stall.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Integrations into CMiC",

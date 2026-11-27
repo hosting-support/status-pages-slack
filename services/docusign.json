@@ -1,6 +1,8 @@
 {
   "name": "DocuSign",
   "purpose": "E-Signature",
+  "about": "Watches DocuSign's eSignature production sites (NA1-NA4, CA); an outage stops sending or completing e-signatures from CMiC.",
+  "details": "Reads DocuSign's status center (health.docusign.com) and keeps only incidents on the eSignature production sites NA1, NA2, NA3, NA4 and CA. CMiC's e-signature integration uses the DocuSign eSignature REST API, so during an incident customers may not be able to send documents for signature, and signed documents may not come back to CMiC.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Integrations into CMiC",

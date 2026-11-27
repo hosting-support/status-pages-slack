@@ -1,6 +1,7 @@
 {
   "name": "PO",
   "purpose": "Purchase Orders",
+  "details": "If it's down, purchase order integrations on that cluster can't reach the PO API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

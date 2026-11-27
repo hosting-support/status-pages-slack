@@ -1,6 +1,8 @@
 {
   "name": "Dynatrace",
   "purpose": "Observability & Monitoring",
+  "about": "Watches Dynatrace's status page; an outage can blind CMiC's monitoring and alerting.",
+  "details": "Reads Dynatrace's status page for the parts CMiC's tenant relies on. During an incident, dashboards, synthetic monitors and alerts may be delayed or missing, so problems in CMiC environments may not be detected.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "provider": "statusio",

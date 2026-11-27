@@ -1,6 +1,8 @@
 {
   "name": "OCI (Oracle Cloud Infrastructure)",
   "purpose": "PaaS (Enterprise Hosted Customers)",
+  "about": "Watches Oracle Cloud Infrastructure's status page; OCI hosts CMiC's PaaS (Enterprise hosted) customers, so an OCI incident can take those environments down.",
+  "details": "Reads OCI's status data, including its incident list. CMiC's Enterprise hosted (PaaS) customer environments run on OCI, so an incident in the regions and services they use can make those environments slow or unavailable.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

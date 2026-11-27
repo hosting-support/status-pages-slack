@@ -1,6 +1,8 @@
 {
   "name": "Jira",
   "purpose": "Programming",
+  "about": "Watches Jira (Atlassian Cloud); an outage stops the team creating, updating or escalating issues.",
+  "details": "Reads Jira's status page. During an outage, the team can't log or update issues, and support escalations synced from Salesforce may not arrive.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "provider": "statuspage",

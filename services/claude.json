@@ -1,6 +1,8 @@
 {
   "name": "Claude",
   "purpose": "AI",
+  "about": "Watches Claude (claude.ai, API, Claude Code and related services); an outage affects the team's AI tools.",
+  "details": "Reads status.claude.com for the parts the team uses, such as claude.ai, the Claude API, Console and Claude Code. During an outage, AI-assisted work and automations that call Claude are unavailable or slow.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "slack": false,

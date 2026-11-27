@@ -1,6 +1,8 @@
 {
   "name": "Microsoft",
   "purpose": "SSO, Copilot",
+  "about": "Watches Microsoft's public cloud status for Microsoft 365, Azure and consumer Copilot; a major Microsoft 365 or Entra outage can stop SSO sign-in to CMiC and Copilot features.",
+  "details": "Reads status.cloud.microsoft, the page Microsoft uses for issues big enough that admins may not reach their own Service health page. It covers Microsoft 365 (including Entra sign-in, Outlook and Teams), Azure, and consumer Copilot as an early warning for Microsoft 365 Copilot. Customers who sign in to CMiC with Microsoft SSO can be locked out during an Entra or Microsoft 365 outage. Smaller, everyday Microsoft 365 incidents only appear in a tenant's admin center (Service health), which this can't read.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

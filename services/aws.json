@@ -1,6 +1,8 @@
 {
   "name": "AWS",
   "purpose": "SaaS (Public Cloud Environments)",
+  "about": "Watches the AWS Health page for us-east-1, where CMiC's SaaS (Public Cloud) environments run; an AWS incident there can make those customer environments slow or unavailable.",
+  "details": "Reads AWS's public health feed and keeps only events for the us-east-1 region. CMiC's SaaS (Public Cloud) customer environments, including NOVA and ATLAS, run in that region, so an AWS incident there (for example in EC2, load balancing or networking) can slow down or take down those environments. Incidents in other regions are ignored.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

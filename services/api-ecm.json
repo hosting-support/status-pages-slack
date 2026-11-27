@@ -1,6 +1,7 @@
 {
   "name": "ECM",
   "purpose": "Document Imaging",
+  "details": "If it's down, document imaging integrations and apps on that cluster can't reach the ECM API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

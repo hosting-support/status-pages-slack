@@ -1,6 +1,8 @@
 {
   "name": "Cloudflare",
   "purpose": "All Hosted Environments",
+  "about": "Watches Cloudflare's status page; Cloudflare sits in front of all CMiC hosted environments, so its incidents can block or slow customer access to CMiC.",
+  "details": "Reads Cloudflare's status page (all components). Cloudflare handles DNS, certificates and traffic for every CMiC hosted environment, so an incident in a Cloudflare service or data centre near customers can make CMiC slow or unreachable for them, even when CMiC's own servers are fine. Cloudflare reports many small, local incidents; check which locations an incident names.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

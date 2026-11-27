@@ -1,6 +1,8 @@
 {
   "name": "Slack",
   "purpose": "AI, Collaboration",
+  "about": "Watches Slack; an outage stops team chat and the alerts this monitor posts to #hostingsupport.",
+  "details": "Reads Slack's status page. During an outage, team communication and every vendor alert posted to #hostingsupport are affected, as are acknowledgements with check-mark reactions.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "slack": false,

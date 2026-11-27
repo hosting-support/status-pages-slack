@@ -1,6 +1,8 @@
 {
   "name": "Luciq",
   "purpose": "Mobile Apps Bug Reporting",
+  "about": "Watches Luciq (formerly Instabug), which CMiC's mobile apps use for bug and crash reporting; an outage means mobile bug reports and crash logs may not arrive.",
+  "details": "Reads Luciq's status page (all components). CMiC's mobile apps send bug reports, crash reports and app performance data to Luciq. During an outage the apps keep working for customers, but reports from them may be delayed or lost.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Integrations into CMiC",

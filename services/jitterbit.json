@@ -1,6 +1,8 @@
 {
   "name": "Jitterbit",
   "purpose": "Salesforce to Jira Sync",
+  "about": "Watches Jitterbit's North America Harmony platform, which runs CMiC's integrations such as Salesforce to Jira; an outage stops those integrations syncing.",
+  "details": "Reads Jitterbit's status page and keeps only the North America Harmony region. Integrations that run on it, such as the Salesforce to Jira sync, stop moving data during an outage.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "slack": false,

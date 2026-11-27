@@ -1,6 +1,7 @@
 {
   "name": "GL",
   "purpose": "General Ledger",
+  "details": "If it's down, general ledger integrations on that cluster can't reach the GL API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

@@ -1,6 +1,8 @@
 {
   "name": "WebLogic Logs",
   "purpose": "AWS SaaS server logs",
+  "about": "Checks CMiC's AWS SaaS WebLogic log index for servers whose logs stopped updating; a growing count can mean servers or their log copying have stopped.",
+  "details": "Runs on a server inside CMiC's network (the log index is VPN only) and counts servers whose log folder hasn't changed for 30 minutes. Servers silent for over a day are left out of the count. Server names go to Slack only. A rising count can mean application servers, or the copying of their logs, have stopped.",
   "group": "CMiC Internal Checks",
   "groupOrder": 4,
   "provider": "weblogiclogs",

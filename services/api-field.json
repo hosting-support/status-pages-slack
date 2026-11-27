@@ -1,6 +1,7 @@
 {
   "name": "Field",
   "purpose": "Field (RFIs, submittals, punch lists)",
+  "details": "If it's down, the CMiC Field mobile apps and field integrations on that cluster can't reach the Field API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

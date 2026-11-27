@@ -1,6 +1,7 @@
 {
   "name": "PM",
   "purpose": "Project Management",
+  "details": "If it's down, project management integrations on that cluster can't reach the PM API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

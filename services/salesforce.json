@@ -1,6 +1,8 @@
 {
   "name": "Salesforce",
   "purpose": "Support Portal, Chat",
+  "about": "Watches the Salesforce instance CMiC's org runs on (looked up each run, currently CAN36); an incident there affects the customer Support Portal and Chat.",
+  "details": "Reads Salesforce Trust status for the instance hosting cmicglobal. The instance is looked up from the My Domain name every run, so a move to another instance is picked up automatically. During an incident, customers may not be able to log or view cases in the Support Portal, or chat with support, and the team may not be able to work cases.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

@@ -1,6 +1,7 @@
 {
   "name": "AR",
   "purpose": "Accounts Receivable",
+  "details": "If it's down, AR integrations on that cluster can't reach the AR API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

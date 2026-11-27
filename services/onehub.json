@@ -1,6 +1,8 @@
 {
   "name": "Onehub",
   "purpose": "CMiC File Share Portal",
+  "about": "Watches Onehub and checks portal.cmicshare.com (CMiC File Share) directly; an outage stops customers downloading files such as software and guides.",
+  "details": "Reads Onehub's status page, and also opens portal.cmicshare.com's public sign-in page every run, with no login. Two failed checks in a row mark it down, and it warns 14 days before the site's security certificate expires. Customers use the File Share portal to download files such as software and guides.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "slack": false,

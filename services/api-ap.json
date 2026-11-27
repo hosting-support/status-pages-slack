@@ -1,6 +1,7 @@
 {
   "name": "AP",
   "purpose": "Accounts Payable",
+  "details": "If it's down, AP invoice and payment integrations on that cluster can't reach the AP API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

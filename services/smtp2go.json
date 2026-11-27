@@ -1,6 +1,8 @@
 {
   "name": "SMTP2GO",
   "purpose": "Emailing (All Hosted Environments)",
+  "about": "Watches SMTP2GO, the email relay for all hosted environments; an outage delays or stops emails sent from CMiC (notifications, workflows, reports).",
+  "details": "Reads SMTP2GO's status page (all components). Hosted CMiC environments send their email (workflow notifications, password resets, scheduled reports) through SMTP2GO. During an outage, those emails can be delayed, bounced or not delivered to some providers such as Outlook or Gmail.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Core Vendors",

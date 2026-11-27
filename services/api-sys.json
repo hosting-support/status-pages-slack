@@ -1,6 +1,7 @@
 {
   "name": "SYS",
   "purpose": "System Admin and Security",
+  "details": "If it's down, system, user and security integrations on that cluster can't reach the SYS API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

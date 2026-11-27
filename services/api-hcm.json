@@ -1,6 +1,7 @@
 {
   "name": "HCM",
   "purpose": "HR and Payroll",
+  "details": "If it's down, HR and payroll integrations on that cluster can't reach the HCM API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,

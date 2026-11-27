@@ -1,6 +1,8 @@
 {
   "name": "Atlassian",
   "purpose": "Customer Status Page",
+  "about": "Watches Atlassian Statuspage, which runs CMiC's customer status page; an outage can stop customers seeing CMiC incident and maintenance notices.",
+  "details": "Reads Atlassian Statuspage's own status for hosted pages, the management portal and notifications. During an incident, customers may not be able to open CMiC's status page, the team may not be able to post updates, or email and SMS notices may not go out.",
   "group": "Vendors Used Internally",
   "groupOrder": 2,
   "slack": false,

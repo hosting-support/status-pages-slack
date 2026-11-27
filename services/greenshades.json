@@ -1,6 +1,8 @@
 {
   "name": "Greenshades",
   "purpose": "Tax Reporting & Filing",
+  "about": "Watches Greenshades (tax filing, year-end forms, payroll services); an outage delays payroll tax filing and year-end reporting such as W-2s.",
+  "details": "Reads Greenshades' status page. Customers file payroll taxes and produce year-end forms such as W-2s through Greenshades, so an outage can delay filings, which matters most near deadlines.",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
   "subgroup": "Integrations into CMiC",

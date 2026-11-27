@@ -1,6 +1,7 @@
 {
   "name": "JC",
   "purpose": "Job Cost",
+  "details": "If it's down, job cost integrations on that cluster can't reach the JC API.",
   "group": "Public Cloud APIs",
   "groupOrder": 3,
   "slack": false,
