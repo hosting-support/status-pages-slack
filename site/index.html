@@ -92,6 +92,21 @@
     font-size: 16px; font-weight: 500; color: var(--muted); margin: 2px 0 8px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  /* the (?) next to a vendor's name: summary on hover, full description (help.html) on click */
+  .help {
+    display: inline-flex; align-items: center; justify-content: center; vertical-align: 2px;
+    width: 16px; height: 16px; margin-left: 6px; border-radius: 50%; flex: none;
+    border: 1px solid var(--muted); color: var(--muted); background: transparent;
+    font: 700 11px/1 system-ui, sans-serif; text-decoration: none !important; cursor: help;
+  }
+  .help:hover, .help:focus-visible { border-color: var(--maintenance); color: var(--maintenance); outline: none; }
+  .chip-head .help { width: 14px; height: 14px; font-size: 10px; margin-left: 0; align-self: center; }
+  #tip {
+    position: fixed; z-index: 20; max-width: 340px; padding: 8px 10px; border-radius: 8px;
+    background: var(--text); color: var(--bg); font-size: 13px; font-weight: 400; line-height: 1.4;
+    box-shadow: 0 4px 14px rgb(0 0 0 / 25%); pointer-events: none; overflow-wrap: anywhere;
+  }
+  #tip .tip-more { display: block; margin-top: 4px; opacity: .75; font-size: 12px; }
   .card-head h2 a { text-decoration: none; }
   .card-head h2 a:hover { text-decoration: underline; }
   .badge {
@@ -268,12 +283,39 @@
     return li;
   }
 
+  // the (?) icon: its one-sentence summary shows on hover or focus, a click opens help.html at
+  // this service's full description
+  function helpIcon(s) {
+    if (!s.help || !s.help.summary) return null;
+    const a = el('a', { class: 'help', href: `help.html#${encodeURIComponent(s.id)}`, textContent: '?',
+      ariaLabel: `What the ${s.name} check covers`, title: '' });   // empty title: no chip hover text on top
+    a.dataset.tip = s.help.summary;
+    a.addEventListener('click', (e) => e.stopPropagation());   // don't also open the chip
+    a.addEventListener('keydown', (e) => e.stopPropagation());
+    return a;
+  }
+  const tip = el('div', { id: 'tip', role: 'tooltip' }); tip.hidden = true; document.body.append(tip);
+  const showTip = (a) => {
+    tip.replaceChildren(a.dataset.tip, el('span', { class: 'tip-more', textContent: 'Click for the full description' }));
+    tip.hidden = false;
+    const r = a.getBoundingClientRect(), t = tip.getBoundingClientRect();
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - t.width / 2, innerWidth - t.width - 8));
+    const top = r.bottom + 8 + t.height < innerHeight ? r.bottom + 8 : Math.max(8, r.top - t.height - 8);
+    tip.style.left = `${left}px`; tip.style.top = `${top}px`;
+  };
+  const hideTip = () => { tip.hidden = true; };
+  for (const [on, off] of [['mouseover', 'mouseout'], ['focusin', 'focusout']]) {
+    document.addEventListener(on, (e) => { const a = e.target.closest && e.target.closest('.help'); if (a) showTip(a); });
+    document.addEventListener(off, (e) => { if (e.target.closest && e.target.closest('.help')) hideTip(); });
+  }
+  addEventListener('scroll', hideTip, { passive: true });
+
   // compact chip: dot, name, purpose; any open problem written underneath; details on hover
   function chip(s, level) {
     const c = el('div', { class: 'chip', role: 'button', tabIndex: 0, style: `--accent: ${accent(level)}`,
       title: [s.overall && s.overall.description, `checked ${ago(s.checkedAt)}`].filter(Boolean).join('\n') });
     c.append(el('div', { class: 'chip-head' }, el('span', { class: 'dot' }),
-      el('span', { class: 'chip-name', textContent: s.name }),
+      el('span', { class: 'chip-name', textContent: s.name }), helpIcon(s),
       s.purpose ? el('span', { class: 'chip-purpose', textContent: s.purpose }) : null));
     // click (or Enter) opens this one as a full tile
     const open1 = () => { openChips.add(s.id); load(); };
@@ -307,7 +349,7 @@
     const level = stale ? 'stale' : (LEVELS[s.level] ? s.level : 'none');
     const c = el('section', { class: 'card', style: `--accent: ${accent(level)}` });
     c.append(el('div', { class: 'card-head' },
-      el('h2', {}, link(s.name, s.statusPage)),
+      el('h2', {}, link(s.name, s.statusPage), helpIcon(s)),
       el('span', { class: 'badge' }, el('span', { class: 'dot' }), LEVELS[level].label)));
     if (s.purpose) c.append(el('div', { class: 'purpose', textContent: s.purpose, title: s.purpose }));
 
@@ -395,6 +437,7 @@
   }
 
   async function load() {
+    hideTip();   // the tiles are rebuilt, so a shown tip would lose its icon
     try {
       const data = await fetchStatus();
       const services = data.services || [];
