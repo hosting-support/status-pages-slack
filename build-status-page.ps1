@@ -69,6 +69,31 @@ foreach ($s in $list) {
     # optional subsection inside the section ("subgroup"), shown lowest "subgroupOrder" first
     $s | Add-Member -NotePropertyName subgroup -NotePropertyValue ([string]$c.subgroup) -Force
     $s | Add-Member -NotePropertyName subgroupOrder -NotePropertyValue $(if ($null -ne $c.subgroupOrder) { [int]$c.subgroupOrder } else { 99 }) -Force
+    # help text for the (?) icon and help.html: "about" (one sentence) and "details" (full text)
+    # from the settings file, plus what is checked. An API's endpoints are listed, and its
+    # one-sentence summary is built from them.
+    $endpoints = @()
+    $summary = [string]$c.about
+    if ($c.api) {
+        foreach ($p in $c.api.hosts.PSObject.Properties) {
+            $endpoints += [pscustomobject]@{ name = $p.Name; url = "$(([string]$p.Value).TrimEnd('/'))/$(([string]$c.api.path).TrimStart('/'))" }
+        }
+        $expect = if ([int]$c.api.expectStatus -eq 401) { 'the login page (HTTP 401)' } else { "HTTP $($c.api.expectStatus) $($c.api.expectText)" }
+        if (-not $summary) {
+            $summary = "Checks $(@($endpoints | ForEach-Object url) -join ' and ') without a login, expecting $expect. $([string]$c.details)"
+        }
+    }
+    if ($c.website) { $endpoints += [pscustomobject]@{ name = [string]$c.website.name; url = [string]$c.website.url } }
+    $statusUrl = if ($s.url) { [string]$s.url } else { [string]$c.url }
+    $s | Add-Member -NotePropertyName help -NotePropertyValue ([pscustomobject]@{
+        summary    = $summary
+        details    = [string]$c.details
+        statusPage = $(if ($statusUrl -and $statusUrl -notmatch '\{') { $statusUrl } else { $null })
+        watches    = @($c.categories | Where-Object { $_ })
+        endpoints  = @($endpoints)
+        check      = $(if ($c.api) { [string]$c.api.checkName } else { $null })
+        slack      = ([string]$c.slack -ne 'False')
+    }) -Force
 }
 
 # ---- acknowledgements from Slack reactions ----

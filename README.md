@@ -190,6 +190,11 @@ shows `"purpose"` after the vendor's name (e.g. "AWS - SaaS (Public Cloud Enviro
 incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
 every minute. A service whose data is over 20 minutes old shows as "No recent data".
 
+- **(?) help icon** next to every name. Hover shows a one-sentence summary; a click opens
+  `site/help.html` at that service's full description. The text comes from `"about"` (one
+  sentence: what it checks and what an outage means) and `"details"` (the full description) in
+  each settings file. For the Public Cloud APIs, the summary is built from the endpoints, so
+  `"about"` is left out and `"details"` only says what breaks. Add both for every new service.
 - **Public Cloud APIs** shows as small chips (`COMPACT_SECTIONS` in `site/index.html`). Click a chip to open it as a full tile, or "Show full tiles" for all of them.
 - **Search box and "Only show issues"** above the sections. The search matches a vendor's
   name, its label (e.g. "E-Signature") and its section; press `/` to jump to it and Esc to
