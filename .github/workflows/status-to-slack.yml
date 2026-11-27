@@ -176,7 +176,8 @@ jobs:
         run: |
           mkdir -p status
           if git fetch --depth=1 origin weblogic-logs-data; then
-            for f in $(git ls-tree --name-only FETCH_HEAD -- '*.json'); do
+            # (ls-tree doesn't take wildcards, so filter its list instead)
+            for f in $(git ls-tree --name-only FETCH_HEAD | grep '\.json$'); do
               git show "FETCH_HEAD:$f" > "status/$f"
             done
           else
