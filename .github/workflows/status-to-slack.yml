@@ -8,7 +8,7 @@ on:
       service:
         description: 'Which service to run'
         type: choice
-        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password, calendly, onehub, docusign, openai, jitterbit]
+        options: [all, cloudflare, smtp2go, aws, oci, slack, salesforce, dynatrace, jira, microsoft, claude, luciq, 1password, calendly, onehub, docusign, openai, jitterbit, vertex, greenshades, atlassian-statuspage, api-sys, api-ap, api-ar, api-gl, api-jc, api-pm, api-po, api-hcm, api-ecm, api-field]
         default: all
       test_post:
         description: 'Also post the latest incident update, to preview the format'
@@ -58,6 +58,19 @@ jobs:
           - { id: docusign,   prefix: DOCUSIGN, secret: SLACK_WEBHOOK_URL_DOCUSIGN }
           - { id: openai,     prefix: OPENAI,  secret: SLACK_WEBHOOK_URL_OPENAI }
           - { id: jitterbit,  prefix: JITTERBIT, secret: SLACK_WEBHOOK_URL_JITTERBIT }
+          - { id: vertex,     prefix: VERTEX,  secret: SLACK_WEBHOOK_URL_VERTEX }
+          - { id: greenshades, prefix: GREENSHADES, secret: SLACK_WEBHOOK_URL_GREENSHADES }
+          - { id: atlassian-statuspage, prefix: ATLASSIAN_SP, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # page only
+          - { id: api-sys, prefix: API_SYS, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-ap, prefix: API_AP, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-ar, prefix: API_AR, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-gl, prefix: API_GL, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-jc, prefix: API_JC, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-pm, prefix: API_PM, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-po, prefix: API_PO, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-hcm, prefix: API_HCM, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-ecm, prefix: API_ECM, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
+          - { id: api-field, prefix: API_FIELD, secret: SLACK_WEBHOOK_URL_PAGE_ONLY }   # Public Cloud APIs, page only
     # A manual run for one service skips the other services' steps
     env:
       SELECTED: ${{ github.event_name != 'workflow_dispatch' || inputs.service == 'all' || inputs.service == matrix.id }}
@@ -157,11 +170,15 @@ jobs:
       # WebLogic logs: checked from a machine inside CMiC's network (weblogic-logs/), which pushes
       # its snapshot to this branch. If that machine stops, the snapshot ages and the page shows
       # "No recent data" for it.
-      - name: Get the WebLogic logs snapshot
+      # Results from the check machine inside CMiC's network (CMiC-Hosting-Support/log-monitoring):
+      # weblogic-logs.json (every .json on that branch is copied, in case it sends more)
+      - name: Get the WebLogic logs and Public Cloud API snapshots
         run: |
           mkdir -p status
           if git fetch --depth=1 origin weblogic-logs-data; then
-            git show FETCH_HEAD:weblogic-logs.json > status/weblogic-logs.json
+            for f in $(git ls-tree --name-only FETCH_HEAD -- '*.json'); do
+              git show "FETCH_HEAD:$f" > "status/$f"
+            done
           else
             echo "No weblogic-logs-data branch yet"
           fi
