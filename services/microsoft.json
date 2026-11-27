@@ -3,6 +3,8 @@
   "purpose": "SSO, Copilot",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
+  "subgroup": "Core Vendors",
+  "subgroupOrder": 1,
   "provider": "microsoft",
   "url": "https://status.cloud.microsoft",
   "label": ":office: *Microsoft Status*",

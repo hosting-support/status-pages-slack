@@ -89,11 +89,37 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
         }
     }
 
+    # For the status page: every incident of the last two months, from the summaries (the
+    # updates above only cover incidents that changed since the previous run)
+    $incidentList = foreach ($s in $summaries) {
+        $impacts = @($s.incidentImpacts)
+        $worst = 'none'; $worstText = ''
+        foreach ($i in $impacts) {
+            $v = Get-Impact $i.impactStatus
+            if ($impactRank[$v] -gt $impactRank[$worst]) { $worst = $v; $worstText = $i.impactStatus -creplace '([a-z])([A-Z])', '$1 $2' }
+        }
+        $services = @($impacts.serviceName | Select-Object -Unique)
+        $regions = @($impacts.regionName | Select-Object -Unique)
+        [pscustomobject]@{
+            title       = $s.title
+            url         = "https://ocistatus.oraclecloud.com/#/incidents/$($s.incidentId)"
+            kind        = 'Incident'
+            open        = $s.incidentStatus -ne 'Resolved'
+            status      = $s.incidentStatus
+            impact      = $worst
+            impactText  = $worstText
+            affects     = @($services) + @($regions) + @($impacts.serviceCategory | Select-Object -Unique)
+            showAffects = @($services) + @($regions)
+            time        = $s.lastIncidentPostTime
+        }
+    }
+
     @{
-        overall = @{ indicator = $status.status.indicator; description = $status.status.description }
-        updates = $updates
-        extra   = $extra
-        keepIds = $keepIds
-        preview = $preview
+        overall   = @{ indicator = $status.status.indicator; description = $status.status.description }
+        updates   = $updates
+        extra     = $extra
+        keepIds   = $keepIds
+        preview   = $preview
+        incidents = @($incidentList)
     }
 }

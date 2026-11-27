@@ -25,6 +25,9 @@ A GitHub Actions workflow that checks vendor status pages every 5 minutes and po
 | DocuSign (North America accounts) | https://docusign.statuspage.io | `services/docusign.json` | `SLACK_WEBHOOK_URL_DOCUSIGN` | `DOCUSIGN_` |
 | OpenAI (API only, not ChatGPT or Codex) | https://status.openai.com | `services/openai.json` | `SLACK_WEBHOOK_URL_OPENAI` | `OPENAI_` |
 | Jitterbit (NA Harmony, the Salesforce to Jira sync) | https://jitterbit.statuspage.io | `services/jitterbit.json` | `SLACK_WEBHOOK_URL_JITTERBIT` | `JITTERBIT_` |
+| Vertex (payroll tax: Cloud Payroll Tax, Q Series, Address Cleansing) | https://status.vertexinc.com | `services/vertex.json` | `SLACK_WEBHOOK_URL_VERTEX` | `VERTEX_` |
+| Greenshades (tax reporting and filing) | https://status.greenshadesonline.com | `services/greenshades.json` | `SLACK_WEBHOOK_URL_GREENSHADES` | `GREENSHADES_` |
+| Atlassian Statuspage (runs status.cmiccloud.com; page only) | https://metastatuspage.com | `services/atlassian-statuspage.json` | none | `ATLASSIAN_SP_` |
 
 ## Accounts: where this lives and who can change it
 
@@ -90,6 +93,7 @@ Each service's defaults are in its `services/<id>.json`:
 | `includeMaintenance` | `true` | Also post scheduled maintenance (Statuspage sites, Slack and Salesforce). |
 | `components` | `["Dashboard", "*Workers*"]` | Also post when one of these components changes status (Statuspage sites). |
 | `label` | `":cloud: *Cloudflare Status*"` | Small header on every post. |
+| `subgroup` | `"Integrations into CMiC"` | Subsection inside the section, with `subgroupOrder` (lowest first). Customer-Affecting Vendors has "Core Vendors" (1) and "Integrations into CMiC" (2). |
 | `slack` | `false` | **Page only**: checked and shown on the status page as usual, never posted to Slack, and no webhook secret needed. Its incidents can't be acknowledged with ✅, since there's no post to react to. Today: Calendly, 1Password, Claude, Onehub, Slack, Jitterbit. |
 
 Any of the first four, and the label, can also be overridden without editing files: under
@@ -121,6 +125,23 @@ What `categories` matches, and what the impact levels mean, per service:
   ongoing incidents and remembers them until the incident is resolved. Categories are the APIs
   CMiC's AI features call (Chat Completions, Responses, Files, Agents), so ChatGPT and Codex
   incidents don't count; `skipUntagged` is on for the same reason.
+
+### Public Cloud APIs
+
+A section of its own: one tile per core CMiC REST API on PROD (`services/api-*.json`: SYS, AP, AR,
+GL, JC, PM, PO, HCM, ECM, Field), each checked on ATLAS PROD and NOVA PROD every run, **without a
+login** (`providers/cmicapi.ps1`). Page only. Two kinds of check:
+
+- **ws-ping** (ECM, Field): `<api>/ws-ping` must answer 200 `{"ping":"pong"}`, the app's own
+  no-login health check. Shows the web tier, WebLogic and the app are up.
+- **login page** (the others, whose PROD builds have no ws-ping yet): `<api>/jersey/v1/api-info`
+  must answer WebLogic's "401--Unauthorized". Shows the web tier and WebLogic answer and the app
+  is deployed there, but not that it started cleanly.
+
+Neither proves the database works; that needs a login (a version that does it, from the check
+machine inside CMiC, is parked in `Documents\Claude\parked\api-login-check`). A 404, 5xx,
+timeout, redirect or an unexpected page counts as a problem; two in a row mark that cluster down
+on the tile, and it shows "Back up" in the tile's history when it recovers.
 
 ### Direct website check
 
@@ -169,6 +190,7 @@ shows `"purpose"` after the vendor's name (e.g. "AWS - SaaS (Public Cloud Enviro
 incidents (same filters as the Slack posts) and the last few closed ones. It refreshes itself
 every minute. A service whose data is over 20 minutes old shows as "No recent data".
 
+- **Public Cloud APIs** shows as small chips (`COMPACT_SECTIONS` in `site/index.html`). Click a chip to open it as a full tile, or "Show full tiles" for all of them.
 - **Search box and "Only show issues"** above the sections. The search matches a vendor's
   name, its label (e.g. "E-Signature") and its section; press `/` to jump to it and Esc to
   clear it. "Only show issues" hides every operational tile and is remembered in that

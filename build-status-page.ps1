@@ -66,6 +66,9 @@ foreach ($s in $list) {
     $s | Add-Member -NotePropertyName group -NotePropertyValue $(if ($c.group) { [string]$c.group } else { 'Other Vendors' }) -Force
     $s | Add-Member -NotePropertyName groupOrder -NotePropertyValue $(if ($null -ne $c.groupOrder) { [int]$c.groupOrder } else { 99 }) -Force
     $s | Add-Member -NotePropertyName purpose -NotePropertyValue ([string]$c.purpose) -Force
+    # optional subsection inside the section ("subgroup"), shown lowest "subgroupOrder" first
+    $s | Add-Member -NotePropertyName subgroup -NotePropertyValue ([string]$c.subgroup) -Force
+    $s | Add-Member -NotePropertyName subgroupOrder -NotePropertyValue $(if ($null -ne $c.subgroupOrder) { [int]$c.subgroupOrder } else { 99 }) -Force
 }
 
 # ---- acknowledgements from Slack reactions ----

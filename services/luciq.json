@@ -3,6 +3,8 @@
   "purpose": "Mobile Apps Bug Reporting",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
+  "subgroup": "Integrations into CMiC",
+  "subgroupOrder": 2,
   "provider": "statuspage",
   "url": "https://statuspage.luciq.ai",
   "label": ":iphone: *Luciq Status*",

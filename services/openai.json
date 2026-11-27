@@ -3,6 +3,8 @@
   "purpose": "CMiC AI Features",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
+  "subgroup": "Integrations into CMiC",
+  "subgroupOrder": 2,
   "provider": "statuspage",
   "url": "https://status.openai.com",
   "label": ":robot_face: *OpenAI Status*",

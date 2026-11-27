@@ -1,0 +1,17 @@
+{
+  "name": "Greenshades",
+  "purpose": "Tax Reporting & Filing",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
+  "subgroup": "Integrations into CMiC",
+  "subgroupOrder": 2,
+  "provider": "statuspage",
+  "url": "https://status.greenshadesonline.com",
+  "label": ":page_facing_up: *Greenshades Status*",
+  "categories": ["Tax Service", "Year End Forms", "Payroll", "Employee Services", "Single Sign On", "Data Synchronization Services", "SMS for 2 Factor Authentication"],
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "minImpact": "none",
+  "includeMaintenance": false,
+  "components": []
+}

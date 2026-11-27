@@ -1,0 +1,28 @@
+{
+  "name": "Field",
+  "purpose": "Field (RFIs, submittals, punch lists)",
+  "group": "Public Cloud APIs",
+  "groupOrder": 3,
+  "slack": false,
+  "provider": "cmicapi",
+  "url": "",
+  "label": ":electric_plug: *Field API*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "api": {
+    "path": "cmic-field-rest-api/ws-ping",
+    "expectStatus": 200,
+    "expectText": "pong",
+    "checkName": "ws-ping",
+    "hosts": {
+      "ATLAS PROD": "https://atlas-api.cmiccloud.com/cmicprod",
+      "NOVA PROD": "https://nova-api.cmiccloud.com/cmicprod"
+    },
+    "slowSeconds": 20,
+    "timeoutSeconds": 30,
+    "failAfter": 2
+  }
+}

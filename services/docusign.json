@@ -3,6 +3,8 @@
   "purpose": "E-Signature",
   "group": "Customer-Affecting Vendors",
   "groupOrder": 1,
+  "subgroup": "Integrations into CMiC",
+  "subgroupOrder": 2,
   "provider": "docusign",
   "url": "https://health.docusign.com/status",
   "label": ":writing_hand: *DocuSign Status*",

@@ -1,0 +1,28 @@
+{
+  "name": "PO",
+  "purpose": "Purchase Orders",
+  "group": "Public Cloud APIs",
+  "groupOrder": 3,
+  "slack": false,
+  "provider": "cmicapi",
+  "url": "",
+  "label": ":electric_plug: *PO API*",
+  "categories": [],
+  "minImpact": "none",
+  "skipUntagged": false,
+  "skipOverallStatus": true,
+  "includeMaintenance": false,
+  "api": {
+    "path": "po-rest-api/jersey/v1/api-info",
+    "expectStatus": 401,
+    "expectText": "401--Unauthorized",
+    "checkName": "login page",
+    "hosts": {
+      "ATLAS PROD": "https://atlas-api.cmiccloud.com/cmicprod",
+      "NOVA PROD": "https://nova-api.cmiccloud.com/cmicprod"
+    },
+    "slowSeconds": 20,
+    "timeoutSeconds": 30,
+    "failAfter": 2
+  }
+}

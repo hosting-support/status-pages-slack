@@ -1,0 +1,17 @@
+{
+  "name": "Vertex",
+  "purpose": "Payroll Tax Calculation",
+  "group": "Customer-Affecting Vendors",
+  "groupOrder": 1,
+  "subgroup": "Integrations into CMiC",
+  "subgroupOrder": 2,
+  "provider": "statuspage",
+  "url": "https://status.vertexinc.com",
+  "label": ":receipt: *Vertex Status*",
+  "categories": ["Vertex Cloud Payroll Tax", "Vertex Payroll Tax Q Series On-Demand", "Vertex Address Cleansing"],
+  "skipUntagged": true,
+  "skipOverallStatus": true,
+  "minImpact": "none",
+  "includeMaintenance": false,
+  "components": []
+}

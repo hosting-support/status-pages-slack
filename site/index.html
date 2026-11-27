@@ -123,6 +123,33 @@
   .card details.more { margin-top: 8px; font-size: 13px; }
   .card details.more ul.incidents { margin-top: 8px; font-size: 15px; }
   .error { padding: 14px 16px; border-radius: 10px; background: var(--card); border: 1px solid var(--line); }
+  /* compact sections (Public Cloud APIs): small chips, 5 per row */
+  .chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: start; }
+  .section[open] > .chips { margin-top: 12px; }
+  @media (max-width: 1050px) { .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 640px)  { .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .chip {
+    --accent: var(--none); min-width: 0; cursor: default;
+    background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: 8px; padding: 6px 10px;
+  }
+  .chip-head { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .chip-head .dot { width: 8px; height: 8px; align-self: center; }
+  .chip-name { font-weight: 700; font-size: 14px; flex: none; }
+  .chip-purpose { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip-issue { margin-top: 3px; font-size: 12px; font-weight: 600; color: color-mix(in srgb, var(--accent) 75%, var(--text)); overflow-wrap: anywhere; }
+  .view-toggle-row { text-align: right; margin-top: 8px; }
+  .chip { cursor: pointer; }
+  .chip:hover { box-shadow: 0 1px 4px color-mix(in srgb, var(--text) 18%, transparent); }
+  .chip:focus-visible { outline: 2px solid var(--maintenance); outline-offset: 1px; }
+  /* a chip clicked open: its full tile, two chips wide */
+  .chips > .card.chip-open { grid-column: span 2; }
+  @media (max-width: 640px) { .chips > .card.chip-open { grid-column: 1 / -1; } }
+  /* subsections inside a section (Customer-Affecting: Core Vendors, Integrations into CMiC) */
+  .subsections { display: grid; gap: 14px; }
+  .section[open] > .subsections { margin-top: 12px; }
+  .subsection-title { font-size: 16px; font-weight: 700; color: var(--muted); margin: 0 0 8px; }
+  .view-toggle { font: inherit; font-size: 12px; color: var(--muted); background: none; border: none; padding: 2px 4px; cursor: pointer; text-decoration: underline; }
   /* toolbar: search and "only issues", above the sections */
   [hidden] { display: none !important; }
   .toolbar { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -179,6 +206,12 @@
 
   const MAX_OPEN = 3;          // open incidents shown on a tile before "Show N more"
   const BANNER_SKIPS = ['CMiC Internal Checks', 'Public Cloud APIs'];   // sections the top banner leaves out (it counts vendors)
+  // sections shown as small chips instead of full tiles; "Show full tiles" switches one back,
+  // remembered in this browser
+  const COMPACT_SECTIONS = ['Public Cloud APIs'];
+  const openChips = new Set();   // chips clicked open as full tiles (this visit only)
+  const fullTiles = new Set((() => { try { return JSON.parse(localStorage.getItem('fullTileSections') || '[]'); } catch { return []; } })());
+  const saveFullTiles = () => { try { localStorage.setItem('fullTileSections', JSON.stringify([...fullTiles])); } catch {} };
   const expanded = new Set();  // tiles whose "Show N more" is open, kept across the minute refresh
   // collapsed sections, remembered in this browser (storage can be unavailable; then just this visit)
   const collapsed = new Set((() => { try { return JSON.parse(localStorage.getItem('collapsedSections') || '[]'); } catch { return []; } })());
@@ -233,6 +266,40 @@
         i.ack.comment ? el('div', { class: 'ack-note', textContent: i.ack.comment }) : null));
     }
     return li;
+  }
+
+  // compact chip: dot, name, purpose; any open problem written underneath; details on hover
+  function chip(s, level) {
+    const c = el('div', { class: 'chip', role: 'button', tabIndex: 0, style: `--accent: ${accent(level)}`,
+      title: [s.overall && s.overall.description, `checked ${ago(s.checkedAt)}`].filter(Boolean).join('\n') });
+    c.append(el('div', { class: 'chip-head' }, el('span', { class: 'dot' }),
+      el('span', { class: 'chip-name', textContent: s.name }),
+      s.purpose ? el('span', { class: 'chip-purpose', textContent: s.purpose }) : null));
+    // click (or Enter) opens this one as a full tile
+    const open1 = () => { openChips.add(s.id); load(); };
+    c.addEventListener('click', open1);
+    c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open1(); } });
+    if (level !== 'none') {
+      const open = (s.open || []).map(i => i.title);
+      c.append(el('div', { class: 'chip-issue', textContent: open.length ? open.join('; ') : LEVELS[level].label }));
+    }
+    return c;
+  }
+  // a section's tiles: one grid, or one per subsection ("subgroup") under its own heading
+  function subsections(list) {
+    if (!list.some(c => c.sub)) return el('div', { class: 'grid' }, ...list.map(c => c.node));
+    const subs = [...new Set(list.map(c => c.sub))].sort((a, b) =>
+      Math.min(...list.filter(c => c.sub === a).map(c => c.subOrder)) - Math.min(...list.filter(c => c.sub === b).map(c => c.subOrder)) || a.localeCompare(b));
+    return el('div', { class: 'subsections' }, ...subs.map(sg => el('div', { class: 'subsection' },
+      sg ? el('h3', { class: 'subsection-title', textContent: sg }) : null,
+      el('div', { class: 'grid' }, ...list.filter(c => c.sub === sg).map(c => c.node)))));
+  }
+  // the "Show full tiles" / "Show compact" link under a compact section
+  function viewToggle(g) {
+    const full = fullTiles.has(g);
+    const b = el('button', { class: 'view-toggle', type: 'button', textContent: full ? 'Show compact' : 'Show full tiles' });
+    b.addEventListener('click', () => { full ? fullTiles.delete(g) : fullTiles.add(g); saveFullTiles(); load(); });
+    return el('div', { class: 'view-toggle-row' }, b);
   }
 
   function card(s) {
@@ -332,7 +399,18 @@
       const data = await fetchStatus();
       const services = data.services || [];
       const cards = services.map(s => {
-        const c = { ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99 };
+        const c = { ...card(s), group: s.group || 'Other Vendors', order: s.groupOrder ?? 99,
+                    sub: s.subgroup || '', subOrder: s.subgroupOrder ?? 99 };
+        // compact sections show a small chip instead of the full tile, unless the viewer asked for
+        // tiles, or clicked that chip open
+        if (COMPACT_SECTIONS.includes(c.group) && !fullTiles.has(c.group)) {
+          if (openChips.has(s.id)) {
+            c.node.classList.add('chip-open');
+            const less = el('button', { class: 'view-toggle', type: 'button', textContent: 'Show less' });
+            less.addEventListener('click', () => { openChips.delete(s.id); load(); });
+            c.node.append(el('div', { class: 'view-toggle-row' }, less));
+          } else c.node = chip(s, c.level);
+        }
         // what the search box matches, and whether "Only show issues" keeps it
         c.node.dataset.search = [s.name, s.purpose, c.group].filter(Boolean).join(' ').toLowerCase();
         c.node.dataset.issue = c.level === 'none' ? '0' : '1';
@@ -353,7 +431,10 @@
             el('span', { class: 'chevron', textContent: '▶', ariaHidden: 'true' }),
             el('h2', { class: 'section-title', textContent: g }),
             el('span', { class: 'section-summary', style: `--accent: ${accent(worst)}` }, el('span', { class: 'dot' }), summaryText)),
-          el('div', { class: 'grid' }, ...list.map(c => c.node)));
+          COMPACT_SECTIONS.includes(g) && !fullTiles.has(g)
+            ? el('div', { class: 'chips' }, ...list.map(c => c.node))
+            : subsections(list),
+          COMPACT_SECTIONS.includes(g) ? viewToggle(g) : null);
         sec.dataset.group = g;
         sec.open = !collapsed.has(g);
         // while searching or filtering, sections open on their own; that isn't remembered
@@ -394,12 +475,15 @@
     let shown = 0, total = 0;
     for (const sec of document.querySelectorAll('#grid .section')) {
       let n = 0;
-      for (const c of sec.querySelectorAll('.card')) {
+      for (const c of sec.querySelectorAll('.card, .chip')) {
         const ok = (!q || c.dataset.search.includes(q)) && (!issuesOnly || c.dataset.issue === '1');
         c.hidden = !ok;
         total++; if (ok) n++;
       }
       shown += n;
+      for (const sub of sec.querySelectorAll('.subsection')) {
+        sub.hidden = filtering() && ![...sub.querySelectorAll('.card, .chip')].some(c => !c.hidden);
+      }
       sec.hidden = filtering() && n === 0;
       // open sections with matches while filtering; otherwise back to how the viewer left them
       sec.open = filtering() ? (n > 0 || sec.open) : !collapsed.has(sec.dataset.group);

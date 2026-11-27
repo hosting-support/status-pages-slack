@@ -3,23 +3,29 @@
 # not in GitHub Actions. Its address comes from the WEBLOGIC_LOGS_URL environment variable, set
 # by the runner, so it isn't in this public repository.
 #
-# The repository and status page are public, so server names go to Slack only (one post when a
-# server's logs stop, one when they come back). The page shows just a count, "3 of 47 servers'
-# logs not updating (6%)", and the tile's level follows the share of servers affected:
-# up to 5% minor, up to 15% major, above that critical. The count can't be acknowledged with a
-# Slack reaction, so a growing outage can't hide behind an earlier acknowledgement.
+# What counts as "not updating": nothing in a server's folder has changed for "staleMinutes"
+# (default 30). That's what it looks like when the copy to the logs page stops for a server.
+# (An earlier version watched for an empty adminServer.out, but on most servers that file sits
+# empty for hours after each hourly rotation while the other logs keep arriving, so it alerted
+# all day long.)
 #
-# A server's logs count as "not updating" when a watched file (by default the server's
-# <server>_*_adminServer.out, which WebLogic writes to every minute or so) is 0 bytes and hasn't
-# been touched for "zeroMinutes". It stays open until the file has data again, so the hourly
-# rotation touching an empty file doesn't close and reopen it. One incident per server.
+# A server silent for more than "silentAfterHours" (default 24) is left out of the count: it was
+# posted when it stopped, and it's most likely stopped or retired. The tile notes how many there
+# are, and Slack says so when one comes back.
+#
+# The repository and status page are public, so server names go to Slack only. The page shows a
+# count, "3 of 34 servers' logs not updating (9%)", and the level follows the share of servers:
+# up to 5% minor, up to 15% major, above that critical.
+#
+# Slack gets one post per check, only when something changed: which servers stopped, which came
+# back, and which went silent for over a day. If the copy stops everywhere at once, that's one
+# post, not one per server.
 #
 # Settings, under "logs" in services\<id>.json (all optional):
-#   files               wildcards of the files to watch; {server} is the folder name
-#   zeroMinutes         how long a file may sit at 0 bytes (default 5)
-#   notUpdatedMinutes   also flag a file with data that hasn't changed for this long (0 = off)
-#   ignoreOlderThanDays files untouched for longer are treated as a retired server (default 14)
-#   ignoreServers       folder names (wildcards) to skip, e.g. servers being rebuilt
+#   staleMinutes        how long a folder may go without a new or changed file (default 30)
+#   silentAfterHours    after this long, a server is left out of the count (default 24)
+#   ignoreOlderThanDays folders with nothing newer than this are skipped altogether (default 14)
+#   ignoreServers       folder names (wildcards) to skip, e.g. retired servers
 #   minorUpToPercent    share of servers not updating that's still "minor" (default 5)
 #   majorUpToPercent    up to this share it's "major"; above it "critical" (default 15)
 #   timeZone            time zone of the listing's dates (default Eastern)
@@ -29,10 +35,9 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     $url          = $(if ($env:WEBLOGIC_LOGS_URL) { $env:WEBLOGIC_LOGS_URL } else { [string]$Config.url })
     if (-not $url) { throw 'No log index address: set WEBLOGIC_LOGS_URL (run-weblogic-logs.ps1 -SaveSecrets)' }
     $base         = $url.TrimEnd('/') + '/'
-    $patterns     = @($(if ($o.files) { $o.files } else { '{server}_*_adminServer.out' }))
-    $zeroMin      = $(if ($null -ne $o.zeroMinutes) { [double]$o.zeroMinutes } else { 5 })
-    $quietMin     = $(if ($null -ne $o.notUpdatedMinutes) { [double]$o.notUpdatedMinutes } else { 0 })
-    $retiredDays  = $(if ($null -ne $o.ignoreOlderThanDays) { [double]$o.ignoreOlderThanDays } else { 14 })
+    $staleMin     = $(if ($null -ne $o.staleMinutes) { [double]$o.staleMinutes } else { 30 })
+    $silentHours  = $(if ($null -ne $o.silentAfterHours) { [double]$o.silentAfterHours } else { 24 })
+    $skipDays     = $(if ($null -ne $o.ignoreOlderThanDays) { [double]$o.ignoreOlderThanDays } else { 14 })
     $ignore       = @($o.ignoreServers | Where-Object { $_ })
     $minorUpTo    = $(if ($null -ne $o.minorUpToPercent) { [double]$o.minorUpToPercent } else { 5 })
     $majorUpTo    = $(if ($null -ne $o.majorUpToPercent) { [double]$o.majorUpToPercent } else { 15 })
@@ -73,103 +78,101 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
     # "now" from the log server's own clock, so a wrong clock on this machine doesn't matter
     $now = try { ([datetimeoffset]::Parse([string]$root.date, $culture)).UtcDateTime } catch { [datetime]::UtcNow }
 
-    $previous = @{}
-    foreach ($p in @($Saved.open)) {
-        if ($p) { $p.since = (ConvertTo-Utc $p.since).ToString('o'); $previous[[string]$p.server] = $p }
+    # what the last run saw. State from before this version (v2) is just a baseline: nothing is
+    # posted for the switch-over.
+    $first = -not ($Saved -and $Saved.v -eq 2)
+    $prevOpen = @{}; $prevSilent = @{}
+    if (-not $first) {
+        foreach ($p in @($Saved.open))   { if ($p) { $prevOpen[[string]$p.server]   = ConvertTo-Utc $p.since } }
+        foreach ($p in @($Saved.silent)) { if ($p) { $prevSilent[[string]$p.server] = ConvertTo-Utc $p.since } }
     }
 
-    $open = @{}; $checked = 0; $retired = 0; $failed = @()
+    $open = @{}; $silent = @{}; $checked = 0; $failed = @()
     foreach ($folder in $root.rows | Where-Object { $_.size -eq '-' -and $_.name.EndsWith('/') -and $_.name -ne '../' }) {
         $server = $folder.name.TrimEnd('/')
         if ($ignore | Where-Object { $server -like $_ }) { continue }
-        try { $files = (Get-Listing "$base$($folder.name)").rows }
+        try { $files = @((Get-Listing "$base$($folder.name)").rows | Where-Object { $_.size -ne '-' }) }
         catch {
-            # can't tell either way, so an open incident stays as it was
+            # can't tell either way, so the server keeps its last state
             $failed += $server
-            if ($previous[$server]) { $open[$server] = $previous[$server] }
+            if ($prevOpen.ContainsKey($server))   { $open[$server]   = $prevOpen[$server];   $checked++ }
+            if ($prevSilent.ContainsKey($server)) { $silent[$server] = $prevSilent[$server] }
             continue
         }
-        $watched = @($files | Where-Object { $f = $_; $patterns | Where-Object { $f.name -like $_.Replace('{server}', $server) } })
-        $live = @($watched | Where-Object { ($now - $_.time).TotalDays -le $retiredDays })
-        if (-not $live) { if ($watched) { $retired++ }; continue }
+        if (-not $files) { continue }
+        $last = ($files | Measure-Object time -Maximum).Maximum      # newest file in the folder
+        $age  = $now - $last
+        if ($age.TotalDays -gt $skipDays) { continue }                # long gone: not mentioned at all
+        if ($age.TotalHours -ge $silentHours) { $silent[$server] = $last; continue }
         $checked++
-
-        $bad = foreach ($f in $live) {
-            $age = $now - $f.time
-            if ($f.size -eq '0' -and ($age.TotalMinutes -ge $zeroMin -or $previous[$server])) {
-                [pscustomobject]@{ file = $f.name; since = $f.time; why = 'empty' }
-            } elseif ($quietMin -gt 0 -and $f.size -ne '0' -and $age.TotalMinutes -ge $quietMin) {
-                [pscustomobject]@{ file = $f.name; since = $f.time; why = 'quiet' }
-            }
-        }
-        $bad = @($bad)
-        if (-not $bad) { continue }
-        # keep the original start time while it stays open (rotation re-touches empty files)
-        $since = if ($previous[$server]) { ConvertTo-Utc $previous[$server].since }
-                 else { ($bad | Sort-Object since | Select-Object -First 1).since }
-        $open[$server] = [pscustomobject]@{
-            server = $server
-            since  = $since.ToUniversalTime().ToString('o')
-            # the time in the link makes each occurrence its own incident for Slack acknowledgements
-            url    = "$base$server/#since-$($since.ToUniversalTime().ToString('yyyyMMddTHHmm'))"
-            files  = @($bad | ForEach-Object { $_.file })
-            detail = (@($bad | ForEach-Object {
-                $what = if ($_.why -eq 'empty') { 'is 0 bytes' } else { 'has not changed' }
-                "$($_.file) $what since $(Format-Local $_.since)"
-            }) -join "`n")
-        }
+        if ($age.TotalMinutes -ge $staleMin) { $open[$server] = $last }
     }
 
-    # level from the share of servers not updating, rounded to a whole percent
+    # level from the share of (counted) servers not updating, rounded to a whole percent
     $pct = if ($checked) { [Math]::Round(100 * $open.Count / $checked) } else { 0 }
     $impact = if (-not $open.Count) { 'none' } elseif ($pct -le $minorUpTo) { 'minor' } elseif ($pct -le $majorUpTo) { 'major' } else { 'critical' }
     $color  = @{ none = 'green'; minor = 'yellow'; major = 'orange'; critical = 'red' }[$impact]
 
-    # Slack: one post per server when its logs stop, colored by the overall level at the time
-    $updates = @()
-    foreach ($s in $open.Values) {
-        $since = ConvertTo-Utc $s.since
-        $updates += [pscustomobject]@{
-            id         = "stale|$($s.server)|$($s.since)"
-            time       = $since.ToString('o')
-            kind       = 'Incident'
-            title      = "Logs not updating: $($s.server)"
-            url        = $s.url
-            status     = 'Detected'
-            color      = $color
-            impact     = $impact
-            impactText = "$($open.Count) of $checked servers ($pct%)"
-            affects    = @($s.files)
-            body       = "$($s.detail)`nFor $(Format-Age ($now - $since))."
-        }
+    if ($failed) { Write-Host "Couldn't read $($failed.Count) folder(s): $($failed -join ', ')" }
+    Write-Host "Checked $checked servers, $($silent.Count) silent for over $silentHours h (not counted): $($open.Count) not updating ($pct%, $impact)"
+    if (-not $checked -and -not $silent.Count -and -not $failed) { throw "No server folders with files found at $base" }
+
+    # ---- Slack: one post per check, only when something changed ----
+    $stopped  = @($open.Keys   | Where-Object { -not $prevOpen.ContainsKey($_) -and -not $prevSilent.ContainsKey($_) } | Sort-Object)
+    $back     = @($prevOpen.Keys + $prevSilent.Keys | Select-Object -Unique |
+                  Where-Object { -not $open.ContainsKey($_) -and -not $silent.ContainsKey($_) -and -not ($failed -contains $_) } | Sort-Object)
+    $wentQuiet = @($silent.Keys | Where-Object { -not $prevSilent.ContainsKey($_) } | Sort-Object)
+    # silent ones that come back to merely "not updating" count as stopped again
+    $stopped += @($open.Keys | Where-Object { $prevSilent.ContainsKey($_) } | Sort-Object)
+
+    # at most 10 names per list, so a post stays readable (and under Slack's length limit)
+    function Limit-List($names, [scriptblock]$line) {
+        @($names | Select-Object -First 10 | ForEach-Object $line) +
+        @($(if ($names.Count -gt 10) { "- and $($names.Count - 10) more" }))
     }
-    # ... and one when they come back (only in this run's feed, so it's never posted twice)
-    foreach ($p in $previous.Values) {
-        if ($open.ContainsKey([string]$p.server)) { continue }
-        $since = ConvertTo-Utc $p.since
+    $updates = @()
+    if (-not $first -and ($stopped -or $back -or $wentQuiet)) {
+        $lines = @()
+        if ($stopped) {
+            $lines += "Stopped updating (nothing new for $staleMin+ min):"
+            $lines += Limit-List $stopped { "- $_ - last file $(Format-Local $open[$_])" }
+        }
+        if ($back) {
+            $lines += 'Updating again:'
+            $lines += Limit-List $back {
+                $since = if ($prevOpen.ContainsKey($_)) { $prevOpen[$_] } else { $prevSilent[$_] }
+                "- $_ - was quiet for $(Format-Age ($now - $since))"
+            }
+        }
+        if ($wentQuiet) {
+            $lines += "Silent for over $silentHours h, now left out of the count:"
+            $lines += Limit-List $wentQuiet { "- $_ - last file $(Format-Local $silent[$_])" }
+        }
+        $what = @(
+            $(if ($stopped) { "$($stopped.Count) stopped" }),
+            $(if ($back) { "$($back.Count) back" }),
+            $(if ($wentQuiet) { "$($wentQuiet.Count) silent for a day" })
+        ) | Where-Object { $_ }
         $updates += [pscustomobject]@{
-            id         = "ok|$($p.server)|$($p.since)"
+            # unique per check, so it posts once and is never repeated
+            id         = "change|$($now.ToString('o'))|$(($stopped + $back + $wentQuiet) -join ',')"
             time       = $now.ToString('o')
             kind       = 'Incident'
-            title      = "Logs not updating: $($p.server)"
-            url        = $p.url
-            status     = 'Resolved'
-            color      = 'green'
-            impact     = 'none'
-            impactText = "$($open.Count) of $checked servers still not updating"
-            affects    = @($p.files)
-            body       = "Logs are being written again. They stopped for $(Format-Age ($now - $since))."
+            title      = "Server logs: $($what -join ', ')"
+            url        = $base
+            status     = $(if ($stopped) { 'Detected' } elseif ($open.Count) { 'Update' } else { 'Resolved' })
+            color      = $(if ($stopped -or $open.Count) { $color } else { 'green' })
+            impact     = $impact
+            impactText = "$($open.Count) of $checked servers not updating ($pct%)"
+            affects    = @()
+            body       = $lines -join "`n"
         }
     }
 
-    if ($failed) { Write-Host "Couldn't read $($failed.Count) folder(s): $($failed -join ', ')" }
-    Write-Host "Checked $checked servers ($retired retired, skipped): $($open.Count) not updating ($pct%, $impact)"
-    if (-not $checked -and -not $failed) { throw "No server folders with watched files found at $base" }
-
-    # The page: one entry with the count, no server names. Its "since" is the oldest open one.
+    # ---- the page: one entry with the count, no server names ----
     $incidents = @()
     if ($open.Count) {
-        $oldest = ($open.Values | ForEach-Object { ConvertTo-Utc $_.since } | Sort-Object | Select-Object -First 1)
+        $oldest = $open.Values | Sort-Object | Select-Object -First 1
         $incidents += [pscustomobject]@{
             key = 'weblogic-count'; open = $true; url = ''; affects = @()
             title      = "$($open.Count) of $checked servers' logs not updating ($pct%)"
@@ -182,11 +185,18 @@ function Get-StatusFeed($Config, [switch]$IncludeMaintenance, $Saved) {
             time       = $oldest.ToString('o')
         }
     }
+    $note = if ($silent.Count) { "$($silent.Count) server$(if ($silent.Count -ne 1) { 's' }) silent for over $silentHours h, not counted" }
 
     @{
-        overall   = $null      # the count above says it; the tile has no vendor headline
-        updates   = $updates
-        incidents = $incidents
-        extra     = @{ open = @($open.Values) }
+        # no Slack post for this (skipOverallStatus); the page shows the description on the tile
+        overall    = $(if ($note) { @{ indicator = 'none'; description = $note } } else { $null })
+        updates    = $updates
+        incidents  = $incidents
+        rebaseline = $first
+        extra      = @{
+            v      = 2
+            open   = @($open.Keys   | ForEach-Object { @{ server = $_; since = $open[$_].ToString('o') } })
+            silent = @($silent.Keys | ForEach-Object { @{ server = $_; since = $silent[$_].ToString('o') } })
+        }
     }
 }
