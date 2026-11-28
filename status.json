@@ -1,0 +1,1963 @@
+{
+  "generatedAt": "2026-11-28T13:06:07Z",
+  "run": {
+    "trigger": "workflow_dispatch",
+    "url": "https://github.com/hosting-support/status-pages-slack/actions/runs/46147846144",
+    "lastSchedulerAt": "2026-11-28T13:06:07Z"
+  },
+  "services": [
+    {
+      "id": "1password",
+      "name": "1Password",
+      "statusPage": "https://status.1password.com",
+      "checkedAt": "2026-11-28T13:05:24Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Degraded Device Trust Authentication Experience",
+          "url": "https://stspg.io/bbbxnt19cvgp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Device Trust Authentication Service"
+          ],
+          "updated": "2026-11-16T18:21:55Z"
+        },
+        {
+          "title": "High error rate on 1Password.com",
+          "url": "https://stspg.io/5vnxqln1xmdn",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Admin console"
+          ],
+          "updated": "2026-10-29T19:35:12Z"
+        },
+        {
+          "title": "Some users are unable to view vault profiles using the web interface",
+          "url": "https://stspg.io/9037pn59hmjn",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Admin console"
+          ],
+          "updated": "2026-10-16T17:42:07Z"
+        },
+        {
+          "title": "Device Trust Service Disruption",
+          "url": "https://stspg.io/9sjwgt4v11kr",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Device Trust Authentication Service"
+          ],
+          "updated": "2026-09-09T21:11:08Z"
+        },
+        {
+          "title": "Account governance functions are unavailable in SaaS Manager",
+          "url": "https://stspg.io/9bt7rtjljklp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "SaaS Manager"
+          ],
+          "updated": "2026-07-22T19:20:54Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Password Management",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches 1Password's USA/Global region, where CMiC's account (cmicglobal.1password.com) is; an outage can block the team from reaching saved passwords.",
+        "details": "Reads 1Password's status page and keeps only the USA/Global region. During an outage, team members may not be able to sign in, sync or open shared vaults.",
+        "statusPage": "https://status.1password.com",
+        "watches": [
+          "USA/Global"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "api-ap",
+      "name": "AP",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:51Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.3 s) · NOVA PROD up (0.3 s) · login page"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Accounts Payable",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/ap-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/ap-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, AP invoice and payment integrations on that cluster can't reach the AP API.",
+        "details": "If it's down, AP invoice and payment integrations on that cluster can't reach the AP API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/ap-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/ap-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "api-ar",
+      "name": "AR",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:36Z",
+      "level": "none",
+      "overall": {
+        "description": "ATLAS PROD up (0.3 s) · NOVA PROD up (0.1 s) · login page",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Accounts Receivable",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/ar-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/ar-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, AR integrations on that cluster can't reach the AR API.",
+        "details": "If it's down, AR integrations on that cluster can't reach the AR API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/ar-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/ar-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "atlassian-statuspage",
+      "name": "Atlassian",
+      "statusPage": "https://metastatuspage.com",
+      "checkedAt": "2026-11-28T13:05:35Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Schedule Maintenance is affected",
+          "url": "http://mstspg.co/0sz88vpbh6v0",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Web Portal"
+          ],
+          "updated": "2026-11-17T13:04:19Z"
+        },
+        {
+          "title": "Unable to open manage portal and StatusPage intermittently",
+          "url": "http://mstspg.co/7kd0x24nbf43",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "HTTP Pages",
+            "Admin User+Pass",
+            "Web Portal",
+            "Statuspage",
+            "Pingdom Email",
+            "Email",
+            "Pingdom Integration",
+            "Ticketing",
+            "HTTPS Pages",
+            "Admin Google Auth",
+            "Authenticated API",
+            "External",
+            "New Relic Email",
+            "Slack",
+            "SMS",
+            "Knowledge Base",
+            "Status Embed Widget",
+            "Admin SAML 2.0",
+            "DNS Validation",
+            "Generic Email",
+            "Webhook",
+            "New Relic Integration",
+            "API Documentation",
+            "SSL Provisioning",
+            "Public API",
+            "Page Access Users",
+            "PagerDuty Webhook",
+            "Twitter",
+            "Datadog Integration",
+            "Metastatuspage",
+            "Page Google Auth",
+            "Billing",
+            "Custom Integration",
+            "Shortlinks",
+            "Jira Software Integration",
+            "Marketing Site (www.statuspage.io)",
+            "Page SAML 2.0",
+            "SMS Subscription",
+            "Page IP Restriction",
+            "Signup",
+            "AWS cloudfront",
+            "AWS rds-us-west-2",
+            "AWS route53"
+          ],
+          "updated": "2026-04-09T07:38:51Z"
+        },
+        {
+          "title": "Statuspage API Access Issues",
+          "url": "http://mstspg.co/67r97kfzm2j1",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Authenticated API"
+          ],
+          "updated": "2026-03-11T03:53:49Z"
+        },
+        {
+          "title": "Disrupted Statuspage availability",
+          "url": "http://mstspg.co/vtggyq01mbxw",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "HTTP Pages",
+            "Web Portal",
+            "HTTPS Pages",
+            "Status Embed Widget",
+            "Public API",
+            "Shortlinks",
+            "SMS Subscription"
+          ],
+          "updated": "2026-02-10T23:02:09Z"
+        },
+        {
+          "title": "Partial outage while accessing statuspage",
+          "url": "http://mstspg.co/jnb5mjq6qly8",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [],
+          "updated": "2025-10-29T10:00:00Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Customer Status Page",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Atlassian Statuspage, which runs CMiC's customer status page; an outage can stop customers seeing CMiC incident and maintenance notices.",
+        "details": "Reads Atlassian Statuspage's own status for hosted pages, the management portal and notifications. During an incident, customers may not be able to open CMiC's status page, the team may not be able to post updates, or email and SMS notices may not go out.",
+        "statusPage": "https://metastatuspage.com",
+        "watches": [
+          "Hosted Pages",
+          "Management",
+          "Notifications",
+          "Authentication"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "aws",
+      "name": "AWS",
+      "statusPage": "https://health.aws.amazon.com/health/status",
+      "checkedAt": "2026-11-28T13:05:40Z",
+      "level": "none",
+      "overall": null,
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "SaaS (Public Cloud Environments)",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches the AWS Health page for us-east-1, where CMiC's SaaS (Public Cloud) environments run; an AWS incident there can make those customer environments slow or unavailable.",
+        "details": "Reads AWS's public health feed and keeps only events for the us-east-1 region. CMiC's SaaS (Public Cloud) customer environments, including NOVA and ATLAS, run in that region, so an AWS incident there (for example in EC2, load balancing or networking) can slow down or take down those environments. Incidents in other regions are ignored.",
+        "statusPage": "https://health.aws.amazon.com/health/status",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "calendly",
+      "name": "Calendly",
+      "statusPage": "https://calendlystatus.com",
+      "checkedAt": "2026-11-28T13:05:38Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Calendar syncing and connection issues",
+          "url": "https://calendlystatus.com/incidents/01M78JC1Y7GRPEV2NCZAC6Y2D7",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-11-13T21:43:16Z"
+        },
+        {
+          "title": "Users Unable to Log In to Calendly due to blank Login Page",
+          "url": "https://calendlystatus.com/incidents/01KY8DNAQBV6GEXZQYJMGXE8MK",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-07-23T21:47:55Z"
+        },
+        {
+          "title": "Degraded performance on Calendly.com",
+          "url": "https://calendlystatus.com/incidents/01KX1C73WQSRAF9PHBZHPS63QM",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-07-09T16:37:01Z"
+        },
+        {
+          "title": "Error on Meetings page",
+          "url": "https://calendlystatus.com/incidents/01KS8A4TD7FJRFQFMC74G473G2",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-05-22T17:55:15Z"
+        },
+        {
+          "title": "Stripe billing unavailable",
+          "url": "https://calendlystatus.com/incidents/01KP8VQK7HV6H7GFSR8TG78D24",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "critical",
+          "impactText": "critical",
+          "affects": [],
+          "updated": "2019-07-10T17:12:07Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Meeting Scheduling",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches Calendly's status page; an outage stops customers booking meetings through Calendly.",
+        "details": "Reads Calendly's status page (all components, including its calendar connections and integrations). During an outage, customers may not be able to book, change or see meetings scheduled through Calendly, and new bookings may not reach calendars.",
+        "statusPage": "https://calendlystatus.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "statusPage": "https://status.claude.com",
+      "checkedAt": "2026-11-28T13:05:27Z",
+      "level": "none",
+      "overall": {
+        "indicator": "minor",
+        "description": "Partially Degraded Service"
+      },
+      "open": [
+        {
+          "title": "Claude for Microsoft 365 add-in missing for some users",
+          "url": "https://stspg.io/ffdq2qfv8frk",
+          "kind": "Incident",
+          "status": "Monitoring",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai"
+          ],
+          "updated": "2026-11-27T19:48:22Z",
+          "ack": {
+            "by": [
+              "Novica Lazarevski"
+            ],
+            "since": "2026-11-24T18:06:08Z",
+            "comment": "Not impacting us"
+          }
+        }
+      ],
+      "recent": [
+        {
+          "title": "Degraded performance for Claude Fable 5.2",
+          "url": "https://stspg.io/n4l14k7m49zw",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai",
+            "Claude API (api.anthropic.com)",
+            "Claude Code",
+            "Claude Cowork"
+          ],
+          "updated": "2026-11-27T10:49:33Z"
+        },
+        {
+          "title": "Elevated errors for multiple models",
+          "url": "https://stspg.io/z0c74vfltddb",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [],
+          "updated": "2026-11-25T05:32:26Z"
+        },
+        {
+          "title": "Elevated errors for Claude Haiku 5.5",
+          "url": "https://stspg.io/n7769lzz1dvy",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai",
+            "Claude API (api.anthropic.com)",
+            "Claude Code",
+            "Claude Cowork"
+          ],
+          "updated": "2026-11-24T17:50:42Z"
+        },
+        {
+          "title": "Elevated errors for multiple models",
+          "url": "https://stspg.io/q2ptbwdjx31m",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai",
+            "Claude API (api.anthropic.com)",
+            "Claude Code",
+            "Claude Cowork"
+          ],
+          "updated": "2026-11-23T11:07:41Z"
+        },
+        {
+          "title": "Elevated errors for Claude Mythos 5.2 and Claude Fable 5.2",
+          "url": "https://stspg.io/nlb5fptv28h5",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "claude.ai",
+            "Claude API (api.anthropic.com)",
+            "Claude Code",
+            "Claude Cowork"
+          ],
+          "updated": "2026-11-19T09:33:18Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "AI",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Claude (claude.ai, API, Claude Code and related services); an outage affects the team's AI tools.",
+        "details": "Reads status.claude.com for the parts the team uses, such as claude.ai, the Claude API, Console and Claude Code. During an outage, AI-assisted work and automations that call Claude are unavailable or slow.",
+        "statusPage": "https://status.claude.com",
+        "watches": [
+          "claude.ai",
+          "Claude API*",
+          "Claude Console*",
+          "Claude Code",
+          "Claude Cowork"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "statusPage": "https://www.cloudflarestatus.com",
+      "checkedAt": "2026-11-28T13:05:38Z",
+      "level": "none",
+      "overall": {
+        "description": "Partially Degraded Service",
+        "indicator": "minor"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Elevated Errors for Cloudflare Workers Subrequests",
+          "url": "https://www.cloudflarestatus.com/incidents/j7ihgms4mvhb",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Workers",
+            "Atlanta, United States - (ATL)",
+            "Columbus, United States - (CMH)",
+            "Dallas, United States - (DFW)",
+            "São Paulo, Brazil - (GRU)"
+          ],
+          "updated": "2026-11-28T05:38:42Z"
+        },
+        {
+          "title": "Cloudflare University website unavailable",
+          "url": "https://www.cloudflarestatus.com/incidents/955xa7dtx0ca",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-11-27T15:05:32Z"
+        },
+        {
+          "title": "Workers AI - Deepseek Flash increased errors",
+          "url": "https://www.cloudflarestatus.com/incidents/6crqy1zulybd",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Workers AI"
+          ],
+          "updated": "2026-11-26T14:42:37Z"
+        },
+        {
+          "title": "Firewall Configuration Delay",
+          "url": "https://www.cloudflarestatus.com/incidents/xufkpdtfdglk",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Network",
+            "Firewall"
+          ],
+          "updated": "2026-11-25T09:11:39Z"
+        },
+        {
+          "title": "Elevated number of 5xx errors in Frankfurt",
+          "url": "https://www.cloudflarestatus.com/incidents/lqojvojhdcjv",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Network",
+            "Frankfurt, Germany - (FRA)"
+          ],
+          "updated": "2026-11-25T02:45:00Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "All Hosted Environments",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches Cloudflare's status page; Cloudflare sits in front of all CMiC hosted environments, so its incidents can block or slow customer access to CMiC.",
+        "details": "Reads Cloudflare's status page (all components). Cloudflare handles DNS, certificates and traffic for every CMiC hosted environment, so an incident in a Cloudflare service or data centre near customers can make CMiC slow or unreachable for them, even when CMiC's own servers are fine. Cloudflare reports many small, local incidents; check which locations an incident names.",
+        "statusPage": "https://www.cloudflarestatus.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "docusign",
+      "name": "DocuSign",
+      "statusPage": "https://health.docusign.com/status",
+      "checkedAt": "2026-11-28T13:05:28Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "CA, NA1, NA2, NA3, NA4 available"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Customers may experience email notification errors for PostFinish and docusignxml (Incident 6334)",
+          "url": "https://health.docusign.com/status",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Performance degradation",
+          "affects": [
+            "NA4",
+            "NA2",
+            "NA3",
+            "NA1"
+          ],
+          "updated": "2026-11-24T19:49:00Z"
+        },
+        {
+          "title": "Customers may encounter an error when editing templates (Incident 6276)",
+          "url": "https://health.docusign.com/status",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Performance degradation",
+          "affects": [
+            "AU",
+            "NA3"
+          ],
+          "updated": "2026-11-19T08:06:00Z"
+        },
+        {
+          "title": "Microsoft outage is causing delays for emails sent to Microsoft-hosted domains (Incident 6228)",
+          "url": "https://health.docusign.com/status",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "Informational",
+          "affects": [
+            "DEMO",
+            "AU",
+            "CA",
+            "EU",
+            "JP1",
+            "NA1",
+            "NA2",
+            "NA3",
+            "NA4"
+          ],
+          "updated": "2026-11-14T14:02:00Z"
+        },
+        {
+          "title": "eSign US: Delays in new agreements appearing in Agreement Manager (Incident 6214)",
+          "url": "https://health.docusign.com/status",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "Informational",
+          "affects": [],
+          "updated": "2026-11-11T22:41:06Z"
+        },
+        {
+          "title": "Service disruption impacting Docusign products (Incident 6171)",
+          "url": "https://health.docusign.com/status",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "Service disruption",
+          "affects": [
+            "DEMO",
+            "AU",
+            "CA",
+            "EU",
+            "JP1",
+            "US",
+            "UAT NA11",
+            "EU21",
+            "S1.AU",
+            "NA3",
+            "NA21",
+            "NA1",
+            "S1.EU",
+            "NA4",
+            "US11",
+            "S1.US",
+            "NA11",
+            "NA2",
+            "US13",
+            "S2.US",
+            "US12",
+            "DEMO S1",
+            "EU11"
+          ],
+          "updated": "2026-11-06T22:16:31Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "E-Signature",
+      "subgroup": "Integrations into CMiC",
+      "subgroupOrder": 2,
+      "help": {
+        "summary": "Watches DocuSign's eSignature production sites (NA1-NA4, CA); an outage stops sending or completing e-signatures from CMiC.",
+        "details": "Reads DocuSign's status center (health.docusign.com) and keeps only incidents on the eSignature production sites NA1, NA2, NA3, NA4 and CA. CMiC's e-signature integration uses the DocuSign eSignature REST API, so during an incident customers may not be able to send documents for signature, and signed documents may not come back to CMiC.",
+        "statusPage": "https://health.docusign.com/status",
+        "watches": [
+          "NA1",
+          "NA2",
+          "NA3",
+          "NA4",
+          "CA"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "dynatrace",
+      "name": "Dynatrace",
+      "statusPage": "https://dynatrace.status.io",
+      "checkedAt": "2026-11-28T13:05:30Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All 12 watched components operational"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Observability & Monitoring",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Dynatrace's status page; an outage can blind CMiC's monitoring and alerting.",
+        "details": "Reads Dynatrace's status page for the parts CMiC's tenant relies on. During an incident, dashboards, synthetic monitors and alerts may be delayed or missing, so problems in CMiC environments may not be detected.",
+        "statusPage": "https://dynatrace.status.io",
+        "watches": [
+          "*-AWS-americas",
+          "Dynatrace *"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "api-ecm",
+      "name": "ECM",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:32Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.3 s) · NOVA PROD up (0.1 s) · ws-ping"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Document Imaging",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/ecm-rest-api/ws-ping and https://nova-api.cmiccloud.com/cmicprod/ecm-rest-api/ws-ping without a login, expecting HTTP 200 pong. If it's down, document imaging integrations and apps on that cluster can't reach the ECM API.",
+        "details": "If it's down, document imaging integrations and apps on that cluster can't reach the ECM API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/ecm-rest-api/ws-ping"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/ecm-rest-api/ws-ping"
+          }
+        ],
+        "check": "ws-ping",
+        "slack": false
+      }
+    },
+    {
+      "id": "api-field",
+      "name": "Field",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:37Z",
+      "level": "none",
+      "overall": {
+        "description": "ATLAS PROD up (0.5 s) · NOVA PROD up (0.2 s) · ws-ping",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Field (RFIs, submittals, punch lists)",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/cmic-field-rest-api/ws-ping and https://nova-api.cmiccloud.com/cmicprod/cmic-field-rest-api/ws-ping without a login, expecting HTTP 200 pong. If it's down, the CMiC Field mobile apps and field integrations on that cluster can't reach the Field API.",
+        "details": "If it's down, the CMiC Field mobile apps and field integrations on that cluster can't reach the Field API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/cmic-field-rest-api/ws-ping"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/cmic-field-rest-api/ws-ping"
+          }
+        ],
+        "check": "ws-ping",
+        "slack": false
+      }
+    },
+    {
+      "id": "api-gl",
+      "name": "GL",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:26Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.4 s) · NOVA PROD up (0.2 s) · login page"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "General Ledger",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/glrestapi/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/glrestapi/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, general ledger integrations on that cluster can't reach the GL API.",
+        "details": "If it's down, general ledger integrations on that cluster can't reach the GL API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/glrestapi/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/glrestapi/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "greenshades",
+      "name": "Greenshades",
+      "statusPage": "https://status.greenshadesonline.com",
+      "checkedAt": "2026-11-28T13:05:35Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Intermittent Service Degradation",
+          "url": "https://stspg.io/lvj6qvyr86b9",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Single Sign On",
+            "Employee Services"
+          ],
+          "updated": "2026-09-18T22:29:12Z"
+        },
+        {
+          "title": "Intermittent Service Degradation",
+          "url": "https://stspg.io/7f39m5bv1f8b",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Employee Services"
+          ],
+          "updated": "2026-09-13T00:11:46Z"
+        },
+        {
+          "title": "Intermittent Service Degradation",
+          "url": "https://stspg.io/g9j11cdr1qcv",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Single Sign On"
+          ],
+          "updated": "2026-09-10T20:02:50Z"
+        },
+        {
+          "title": "Intermittent Service Degradation",
+          "url": "https://stspg.io/dtdg521qkdy9",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Twilio SMS",
+            "Twilio SMS Toll-Free, North America",
+            "Twilio REST API",
+            "Single Sign On",
+            "Tax Service",
+            "Employee Services",
+            "Year End Forms",
+            "Azure",
+            "Payroll",
+            "Customer Support and Sales",
+            "Data Synchronization Services",
+            "On Premise Products"
+          ],
+          "updated": "2026-09-04T20:50:51Z"
+        },
+        {
+          "title": "Intermittent Service Degradation",
+          "url": "https://stspg.io/qxy5q491tfwm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Single Sign On",
+            "Employee Services",
+            "Payroll",
+            "Data Synchronization Services"
+          ],
+          "updated": "2026-09-03T21:23:27Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Tax Reporting & Filing",
+      "subgroup": "Integrations into CMiC",
+      "subgroupOrder": 2,
+      "help": {
+        "summary": "Watches Greenshades (tax filing, year-end forms, payroll services); an outage delays payroll tax filing and year-end reporting such as W-2s.",
+        "details": "Reads Greenshades' status page. Customers file payroll taxes and produce year-end forms such as W-2s through Greenshades, so an outage can delay filings, which matters most near deadlines.",
+        "statusPage": "https://status.greenshadesonline.com",
+        "watches": [
+          "Tax Service",
+          "Year End Forms",
+          "Payroll",
+          "Employee Services",
+          "Single Sign On",
+          "Data Synchronization Services",
+          "SMS for 2 Factor Authentication"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "api-hcm",
+      "name": "HCM",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:31Z",
+      "level": "none",
+      "overall": {
+        "description": "ATLAS PROD up (0.5 s) · NOVA PROD up (0.2 s) · login page",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "HR and Payroll",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/hcm-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/hcm-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, HR and payroll integrations on that cluster can't reach the HCM API.",
+        "details": "If it's down, HR and payroll integrations on that cluster can't reach the HCM API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/hcm-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/hcm-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "api-jc",
+      "name": "JC",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:35Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.2 s) · NOVA PROD up (0.3 s) · login page"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Job Cost",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/jc-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/jc-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, job cost integrations on that cluster can't reach the JC API.",
+        "details": "If it's down, job cost integrations on that cluster can't reach the JC API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/jc-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/jc-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "jira",
+      "name": "Jira",
+      "statusPage": "https://jira-software.status.atlassian.com",
+      "checkedAt": "2026-11-28T13:05:47Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Authentication service degraded.",
+          "url": "https://stspg.io/hg2y77hxkyz4",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "Authentication and User Management"
+          ],
+          "updated": "2026-11-23T20:39:18Z"
+        },
+        {
+          "title": "Degraded performance with Microsoft incoming emails",
+          "url": "https://stspg.io/04d806qrqrr4",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Create and edit"
+          ],
+          "updated": "2026-11-14T06:07:30Z"
+        },
+        {
+          "title": "Fields missing across Jira Work Items for some users",
+          "url": "https://stspg.io/4vbvrxgbbzsk",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Viewing content",
+            "Search",
+            "Automation for Jira"
+          ],
+          "updated": "2026-11-02T00:38:50Z"
+        },
+        {
+          "title": "Jira - Project Sidebar Loading Degradation",
+          "url": "https://stspg.io/czwk831b76lg",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Viewing content"
+          ],
+          "updated": "2026-10-21T15:45:09Z"
+        },
+        {
+          "title": "Job processing and scheduling is degraded affecting multiple Atlassian products",
+          "url": "https://stspg.io/037ndsk7y1d4",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Notifications",
+            "Automation for Jira"
+          ],
+          "updated": "2026-10-09T18:24:30Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Programming",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Jira (Atlassian Cloud); an outage stops the team creating, updating or escalating issues.",
+        "details": "Reads Jira's status page. During an outage, the team can't log or update issues, and support escalations synced from Salesforce may not arrive.",
+        "statusPage": "https://jira-software.status.atlassian.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "jitterbit",
+      "name": "Jitterbit",
+      "statusPage": "https://jitterbit.statuspage.io",
+      "checkedAt": "2026-11-28T13:05:28Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "NA Harmony (East): Degraded Performance",
+          "url": "https://stspg.io/5ptyhqscnz18",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "maintenance",
+          "impactText": "maintenance",
+          "affects": [
+            "NA Harmony / Runtime Operation Logs"
+          ],
+          "updated": "2026-09-02T20:52:42Z"
+        },
+        {
+          "title": "Cloud Agent degradation causing API timeout",
+          "url": "https://stspg.io/sg6zfk6xnglr",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "NA Harmony / Cloud Platform",
+            "NA Harmony / Cloud API Gateway"
+          ],
+          "updated": "2026-07-21T19:08:25Z"
+        },
+        {
+          "title": "NA Harmony (East): Degraded Performance",
+          "url": "https://stspg.io/7x7cv50w9y4j",
+          "kind": "Incident",
+          "status": "Postmortem",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "NA Harmony / Management Console",
+            "NA Harmony / Harmony Portal",
+            "NA Harmony / Cloud Platform",
+            "NA Harmony / Cloud Studio",
+            "NA Harmony / Production Cloud Agent Group",
+            "NA Harmony / Sandbox Cloud Agent Group",
+            "NA Harmony / API Manager",
+            "NA Harmony / Cloud API Gateway",
+            "NA Harmony / Marketplace",
+            "NA Harmony / Runtime Operation Logs",
+            "NA Harmony / Cloud Datastore",
+            "NA Harmony / Jitterbit MQ"
+          ],
+          "updated": "2026-05-08T19:28:23Z"
+        },
+        {
+          "title": "Missing API Logs",
+          "url": "https://stspg.io/vg0yky4j790p",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "APAC Harmony / API Manager",
+            "EMEA Harmony / API Manager",
+            "NA Harmony / API Manager"
+          ],
+          "updated": "2026-04-09T16:05:35Z"
+        },
+        {
+          "title": "Harmony SAML authentication",
+          "url": "https://stspg.io/ydf4zxml72m8",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "APAC Harmony / Harmony Portal",
+            "EMEA Harmony / Harmony Portal",
+            "NA Harmony / Harmony Portal"
+          ],
+          "updated": "2026-02-27T22:08:58Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "Salesforce to Jira Sync",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Jitterbit's North America Harmony platform, which runs CMiC's integrations such as Salesforce to Jira; an outage stops those integrations syncing.",
+        "details": "Reads Jitterbit's status page and keeps only the North America Harmony region. Integrations that run on it, such as the Salesforce to Jira sync, stop moving data during an outage.",
+        "statusPage": "https://jitterbit.statuspage.io",
+        "watches": [
+          "NA Harmony"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "luciq",
+      "name": "Luciq",
+      "statusPage": "https://statuspage.luciq.ai",
+      "checkedAt": "2026-11-28T13:05:44Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Partially dashboard degradation",
+          "url": "https://stspg.io/j63k7vqwk603",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [],
+          "updated": "2026-09-13T17:44:03Z"
+        },
+        {
+          "title": "Elevated latency and delayed data loading",
+          "url": "https://stspg.io/m8m304lvwshy",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Core",
+            "DSYM Upload",
+            "Web App",
+            "APM",
+            "Crashes",
+            "Surveys & Announcements",
+            "Bugs",
+            "Session Replay",
+            "Feature Requests",
+            "Chats",
+            "App Health"
+          ],
+          "updated": "2026-07-08T13:51:46Z"
+        },
+        {
+          "title": "Delayed Data Processing",
+          "url": "https://stspg.io/phg3mgm6byrg",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2026-06-11T15:39:42Z"
+        },
+        {
+          "title": "Service Disruption",
+          "url": "https://stspg.io/dbkk82wb6b50",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [],
+          "updated": "2026-06-04T10:56:00Z"
+        },
+        {
+          "title": "Data ingestion is down",
+          "url": "https://stspg.io/rvdjplb3r2pp",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Web App",
+            "APM"
+          ],
+          "updated": "2025-11-23T20:13:28Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Mobile Apps Bug Reporting",
+      "subgroup": "Integrations into CMiC",
+      "subgroupOrder": 2,
+      "help": {
+        "summary": "Watches Luciq (formerly Instabug), which CMiC's mobile apps use for bug and crash reporting; an outage means mobile bug reports and crash logs may not arrive.",
+        "details": "Reads Luciq's status page (all components). CMiC's mobile apps send bug reports, crash reports and app performance data to Luciq. During an outage the apps keep working for customers, but reports from them may be delayed or lost.",
+        "statusPage": "https://statuspage.luciq.ai",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "statusPage": "https://status.cloud.microsoft",
+      "checkedAt": "2026-11-28T13:05:28Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "Microsoft 365, Azure and Copilot (consumer) available"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "SSO, Copilot",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches Microsoft's public cloud status for Microsoft 365, Azure and consumer Copilot; a major Microsoft 365 or Entra outage can stop SSO sign-in to CMiC and Copilot features.",
+        "details": "Reads status.cloud.microsoft, the page Microsoft uses for issues big enough that admins may not reach their own Service health page. It covers Microsoft 365 (including Entra sign-in, Outlook and Teams), Azure, and consumer Copilot as an early warning for Microsoft 365 Copilot. Customers who sign in to CMiC with Microsoft SSO can be locked out during an Entra or Microsoft 365 outage. Smaller, everyday Microsoft 365 incidents only appear in a tenant's admin center (Service health), which this can't read.",
+        "statusPage": "https://status.cloud.microsoft",
+        "watches": [
+          "Microsoft 365",
+          "Azure",
+          "Copilot (consumer)"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "oci",
+      "name": "OCI (Oracle Cloud Infrastructure)",
+      "statusPage": "https://ocistatus.oraclecloud.com",
+      "checkedAt": "2026-11-28T13:05:30Z",
+      "level": "none",
+      "overall": {
+        "description": "Normal Performance",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "PaaS (Enterprise Hosted Customers)",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches Oracle Cloud Infrastructure's status page; OCI hosts CMiC's PaaS (Enterprise hosted) customers, so an OCI incident can take those environments down.",
+        "details": "Reads OCI's status data, including its incident list. CMiC's Enterprise hosted (PaaS) customer environments run on OCI, so an incident in the regions and services they use can make those environments slow or unavailable.",
+        "statusPage": "https://ocistatus.oraclecloud.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "onehub",
+      "name": "Onehub",
+      "statusPage": "https://status.onehub.com",
+      "checkedAt": "2026-11-28T13:05:25Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "All Systems Operational · portal.cmicshare.com up (0.3 s)"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "portal.cmicshare.com is down",
+          "url": "https://portal.cmicshare.com/#down-20261125-0310",
+          "kind": "Incident",
+          "status": "Back up",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "portal.cmicshare.com"
+          ],
+          "updated": "2026-11-25T04:25:37Z"
+        },
+        {
+          "title": "FTP Currently Not Functional",
+          "url": "https://stspg.io/vbzmqbbqbhnk",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "FTP"
+          ],
+          "updated": "2026-04-07T19:38:57Z"
+        },
+        {
+          "title": "Intermittent Issues with File Uploads, Folder creations, and Move/Copy",
+          "url": "https://stspg.io/mgj0y0cq60y2",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "Website"
+          ],
+          "updated": "2025-07-28T22:19:32Z"
+        },
+        {
+          "title": "Secure Links being Marked as Malicious",
+          "url": "https://stspg.io/pgvmrnh808bj",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [],
+          "updated": "2025-03-07T22:33:28Z"
+        },
+        {
+          "title": "Phone Lines Not Working",
+          "url": "https://stspg.io/pgfvqdj9d0gb",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [],
+          "updated": "2025-01-23T19:21:37Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "CMiC File Share Portal",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Onehub and checks portal.cmicshare.com (CMiC File Share) directly; an outage stops customers downloading files such as software and guides.",
+        "details": "Reads Onehub's status page, and also opens portal.cmicshare.com's public sign-in page every run, with no login. Two failed checks in a row mark it down, and it warns 14 days before the site's security certificate expires. Customers use the File Share portal to download files such as software and guides.",
+        "statusPage": "https://status.onehub.com",
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "portal.cmicshare.com",
+            "url": "https://portal.cmicshare.com/"
+          }
+        ],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "statusPage": "https://status.openai.com",
+      "checkedAt": "2026-11-28T13:05:26Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "Chat Completions, Responses, Files, Agents operational"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "CMiC AI Features",
+      "subgroup": "Integrations into CMiC",
+      "subgroupOrder": 2,
+      "help": {
+        "summary": "Watches the OpenAI API services CMiC's AI features call; an outage makes CMiC AI features fail for customers using OpenAI.",
+        "details": "Reads status.openai.com and keeps only incidents on the APIs CMiC's AI features call (such as Chat Completions, Responses and Files); ChatGPT-only incidents are ignored. During an incident, CMiC AI features can return errors or time out. Customers set up with Azure OpenAI instead are covered by the Microsoft tile.",
+        "statusPage": "https://status.openai.com",
+        "watches": [
+          "Chat Completions",
+          "Responses",
+          "Files",
+          "Agents"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "api-pm",
+      "name": "PM",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:47Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.3 s) · NOVA PROD up (0.2 s) · login page"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Project Management",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/pm-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/pm-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, project management integrations on that cluster can't reach the PM API.",
+        "details": "If it's down, project management integrations on that cluster can't reach the PM API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/pm-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/pm-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "api-po",
+      "name": "PO",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:32Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "ATLAS PROD up (0.3 s) · NOVA PROD up (0.2 s) · login page"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "Purchase Orders",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/po-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/po-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, purchase order integrations on that cluster can't reach the PO API.",
+        "details": "If it's down, purchase order integrations on that cluster can't reach the PO API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/po-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/po-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "salesforce",
+      "name": "Salesforce",
+      "statusPage": "https://status.salesforce.com/instances/CAN36",
+      "checkedAt": "2026-11-28T13:05:25Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "CAN36 operational"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Degradation: Experience Cloud on CAN36",
+          "url": "https://status.salesforce.com/incidents/20004568",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Degradation (minor)",
+          "affects": [
+            "Experience Cloud"
+          ],
+          "updated": "2026-11-04T15:01:51Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Support Portal, Chat",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches the Salesforce instance CMiC's org runs on (looked up each run, currently CAN36); an incident there affects the customer Support Portal and Chat.",
+        "details": "Reads Salesforce Trust status for the instance hosting cmicglobal. The instance is looked up from the My Domain name every run, so a move to another instance is picked up automatically. During an incident, customers may not be able to log or view cases in the Support Portal, or chat with support, and the team may not be able to work cases.",
+        "statusPage": null,
+        "watches": [
+          "coreService",
+          "Communities",
+          "liveAgent",
+          "search",
+          "ServiceCloudMessagingChannels",
+          "ServiceCloudVoice",
+          "EinsteinBots"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "statusPage": "https://slack-status.com",
+      "checkedAt": "2026-11-28T13:05:28Z",
+      "level": "none",
+      "overall": {
+        "description": "All systems operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Trouble loading Slack and saving changes.",
+          "url": "https://slack-status.com/2026-11/b8bb993128ac94f5",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Connectivity",
+            "Messaging",
+            "Apps/Integrations/APIs",
+            "Workspace/Org Administration"
+          ],
+          "updated": "2026-11-11T18:58:05Z"
+        },
+        {
+          "title": "Slack Real-Time Connection Disruption",
+          "url": "https://slack-status.com/2026-10/58a30c7fc8aa3e80",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Messaging"
+          ],
+          "updated": "2026-10-22T18:50:50Z"
+        },
+        {
+          "title": "Single Sign On errors",
+          "url": "https://slack-status.com/2026-10/6aeafd6248f59a8a",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Login/SSO"
+          ],
+          "updated": "2026-10-14T00:23:07Z"
+        },
+        {
+          "title": "Slack for iOS closing unexpectedly when opening channels",
+          "url": "https://slack-status.com/2026-10/a0cfb0208a1d2032",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Connectivity"
+          ],
+          "updated": "2026-10-12T17:03:31Z"
+        },
+        {
+          "title": "Free Plan Customers Are Experiencing Message Failures",
+          "url": "https://slack-status.com/2026-10/6c28dfb7b670dc02",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "Incident",
+          "affects": [
+            "Messaging"
+          ],
+          "updated": "2026-10-01T18:59:35Z"
+        }
+      ],
+      "group": "Vendors Used Internally",
+      "groupOrder": 2,
+      "purpose": "AI, Collaboration",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Watches Slack; an outage stops team chat and the alerts this monitor posts to #hostingsupport.",
+        "details": "Reads Slack's status page. During an outage, team communication and every vendor alert posted to #hostingsupport are affected, as are acknowledgements with check-mark reactions.",
+        "statusPage": "https://slack-status.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": false
+      }
+    },
+    {
+      "id": "smtp2go",
+      "name": "SMTP2GO",
+      "statusPage": "https://smtp2gostatus.com",
+      "checkedAt": "2026-11-28T13:05:33Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Dashboard: Unscheduled Downtime",
+          "url": "https://stspg.io/fslsjwsw4hfx",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Member Dashboard"
+          ],
+          "updated": "2026-11-24T18:47:33Z"
+        },
+        {
+          "title": "Delivery Delays: Outlook and Gmail",
+          "url": "https://stspg.io/pt0s7byj094c",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "Email sending (SMTP service)"
+          ],
+          "updated": "2026-11-13T22:00:16Z"
+        },
+        {
+          "title": "API Error",
+          "url": "https://stspg.io/j46btb0j8grd",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "API Servers"
+          ],
+          "updated": "2026-10-30T23:20:09Z"
+        },
+        {
+          "title": "Softbounce Errors",
+          "url": "https://stspg.io/8933gtyrk3g1",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "major",
+          "impactText": "major",
+          "affects": [
+            "Email sending (SMTP service)"
+          ],
+          "updated": "2026-10-15T17:23:47Z"
+        },
+        {
+          "title": "Issues with API- statusCode=500",
+          "url": "https://stspg.io/vskq5k5sqwkm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "API Servers"
+          ],
+          "updated": "2026-10-08T09:54:25Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Emailing (All Hosted Environments)",
+      "subgroup": "Core Vendors",
+      "subgroupOrder": 1,
+      "help": {
+        "summary": "Watches SMTP2GO, the email relay for all hosted environments; an outage delays or stops emails sent from CMiC (notifications, workflows, reports).",
+        "details": "Reads SMTP2GO's status page (all components). Hosted CMiC environments send their email (workflow notifications, password resets, scheduled reports) through SMTP2GO. During an outage, those emails can be delayed, bounced or not delivered to some providers such as Outlook or Gmail.",
+        "statusPage": "https://smtp2gostatus.com",
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "api-sys",
+      "name": "SYS",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:05:45Z",
+      "level": "none",
+      "overall": {
+        "description": "ATLAS PROD up (0.2 s) · NOVA PROD up (0 s) · login page",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [],
+      "group": "Public Cloud APIs",
+      "groupOrder": 3,
+      "purpose": "System Admin and Security",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks https://atlas-api.cmiccloud.com/cmicprod/sys-rest-api/jersey/v1/api-info and https://nova-api.cmiccloud.com/cmicprod/sys-rest-api/jersey/v1/api-info without a login, expecting the login page (HTTP 401). If it's down, system, user and security integrations on that cluster can't reach the SYS API.",
+        "details": "If it's down, system, user and security integrations on that cluster can't reach the SYS API.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [
+          {
+            "name": "ATLAS PROD",
+            "url": "https://atlas-api.cmiccloud.com/cmicprod/sys-rest-api/jersey/v1/api-info"
+          },
+          {
+            "name": "NOVA PROD",
+            "url": "https://nova-api.cmiccloud.com/cmicprod/sys-rest-api/jersey/v1/api-info"
+          }
+        ],
+        "check": "login page",
+        "slack": false
+      }
+    },
+    {
+      "id": "vertex",
+      "name": "Vertex",
+      "statusPage": "https://status.vertexinc.com",
+      "checkedAt": "2026-11-28T13:05:28Z",
+      "level": "none",
+      "overall": {
+        "description": "All Systems Operational",
+        "indicator": "none"
+      },
+      "open": [],
+      "recent": [
+        {
+          "title": "Vertex Payroll Tax Q Series On-Demand Performance Incident",
+          "url": "https://stspg.io/p2p3czqklt2h",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "none",
+          "impactText": "none",
+          "affects": [
+            "Vertex Payroll Tax Q Series On-Demand"
+          ],
+          "updated": "2026-05-10T11:03:26Z"
+        },
+        {
+          "title": "Vertex Payroll Cloud - Performance Incident",
+          "url": "https://stspg.io/jljrhbbl39lm",
+          "kind": "Incident",
+          "status": "Resolved",
+          "impact": "minor",
+          "impactText": "minor",
+          "affects": [
+            "Vertex Cloud Payroll Tax"
+          ],
+          "updated": "2025-10-08T18:29:32Z"
+        }
+      ],
+      "group": "Customer-Affecting Vendors",
+      "groupOrder": 1,
+      "purpose": "Payroll Tax Calculation",
+      "subgroup": "Integrations into CMiC",
+      "subgroupOrder": 2,
+      "help": {
+        "summary": "Watches Vertex's payroll tax services; an outage stops payroll tax calculation in CMiC payroll.",
+        "details": "Reads Vertex's status page and keeps only the payroll tax services (not Vertex's sales tax and e-invoicing products). CMiC payroll calls Vertex to calculate payroll taxes, so during an incident payroll runs that need tax calculation can fail or stall.",
+        "statusPage": "https://status.vertexinc.com",
+        "watches": [
+          "Vertex Cloud Payroll Tax",
+          "Vertex Payroll Tax Q Series On-Demand",
+          "Vertex Address Cleansing"
+        ],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    },
+    {
+      "id": "weblogic-logs",
+      "name": "WebLogic Logs",
+      "statusPage": "",
+      "checkedAt": "2026-11-28T13:03:13Z",
+      "level": "none",
+      "overall": {
+        "indicator": "none",
+        "description": "7 servers silent for over 24 h, not counted"
+      },
+      "open": [],
+      "recent": [],
+      "group": "CMiC Internal Checks",
+      "groupOrder": 4,
+      "purpose": "AWS SaaS server logs",
+      "subgroup": "",
+      "subgroupOrder": 99,
+      "help": {
+        "summary": "Checks CMiC's AWS SaaS WebLogic log index for servers whose logs stopped updating; a growing count can mean servers or their log copying have stopped.",
+        "details": "Runs on a server inside CMiC's network (the log index is VPN only) and counts servers whose log folder hasn't changed for 30 minutes. Servers silent for over a day are left out of the count. Server names go to Slack only. A rising count can mean application servers, or the copying of their logs, have stopped.",
+        "statusPage": null,
+        "watches": [],
+        "endpoints": [],
+        "check": null,
+        "slack": true
+      }
+    }
+  ]
+}
