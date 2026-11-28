@@ -1,0 +1,17 @@
+{
+    "id":  "weblogic-logs",
+    "name":  "WebLogic Logs",
+    "statusPage":  "",
+    "checkedAt":  "2026-11-28T13:03:13Z",
+    "level":  "none",
+    "overall":  {
+                    "indicator":  "none",
+                    "description":  "7 servers silent for over 24 h, not counted"
+                },
+    "open":  [
+
+             ],
+    "recent":  [
+
+               ]
+}
